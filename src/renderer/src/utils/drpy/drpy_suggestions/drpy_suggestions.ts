@@ -439,6 +439,18 @@ const Function = [
     documentation: 'log(string)',
   },
   {
+    label: 'getUpdateInfo',
+    insertText: 'log(getUpdateInfo())',
+    detail: '查看版本更新日志',
+    documentation: 'getUpdateInfo()',
+  },
+  {
+    label: 'deepCopy',
+    insertText: 'deepCopy($0)',
+    detail: '深拷贝',
+    documentation: 'deepCopy(_obj)',
+  },
+  {
     label: 'print',
     insertText: 'print($0)',
     detail: '打印日志(文本)',
