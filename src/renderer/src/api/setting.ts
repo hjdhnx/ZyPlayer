@@ -1,77 +1,46 @@
-import request from '@/utils/request';
+import { apiRequest as request } from '@/utils/request';
 
-// 设置默认
-export function setDefault(type, id) {
-  return request({
+export function setDefault(doc) {
+  return request.request({
     url: '/v1/setting/default',
     method: 'post',
-    data: {
-      type,
-      id,
-    },
+    data: doc,
   });
 }
 
-// 获取设置列表
-export function fetchSettingList() {
-  return request({
-    url: '/v1/setting/list',
-    method: 'get',
-  });
-}
-
-export function updateSetting(docs) {
-  return request({
-    url: '/v1/setting',
-    method: 'put',
-    data: docs,
-  });
-}
-
-export function fetchAgreement() {
-  return request({
-    url: '/v1/setting/agreement',
-    method: 'get',
-  });
-}
-
-export function clearDb(type) {
-  return request({
-    url: '/v1/db/clear',
-    method: 'delete',
-    data: type,
-  });
-}
-
-export function exportDb(type) {
-  return request({
-    url: '/v1/db/export',
-    method: 'post',
-    data: type,
-  });
-}
-
-export function initDb(docs) {
-  return request({
-    url: '/v1/db/init',
-    method: 'post',
-    data: docs,
-  });
-}
-
-export function setup() {
-  return request({
+export function fetchSetup() {
+  return request.request({
     url: '/v1/setting/setup',
     method: 'get',
   });
 }
 
-export function fetchSettingDetail(key) {
-  return request({
-    url: '/v1/setting/detail',
+export function fetchSettingList() {
+  return request.request({
+    url: '/v1/setting/list',
     method: 'get',
-    params: {
-      key,
-    },
+  });
+}
+
+export function putSetting(doc) {
+  return request.request({
+    url: '/v1/setting',
+    method: 'put',
+    data: doc,
+  });
+}
+
+export function sourceSetting(doc) {
+  return request.request({
+    url: '/v1/setting/source',
+    method: 'put',
+    data: doc,
+  });
+}
+
+export function getSettingDetail(key) {
+  return request.request({
+    url: `/v1/setting/value/${key}`,
+    method: 'get',
   });
 }

@@ -1,0 +1,9 @@
+import { USER_AGENT } from '@shared/config/userAgent';
+
+const MOBILE_UA = USER_AGENT.MOBILE_ANDROID_PIXEL;
+const PC_UA = USER_AGENT.PC_WIN32_CHROME;
+const UA = USER_AGENT.UA;
+const UC_UA = USER_AGENT.MOBILE_ANDROID_MI_UC;
+const IOS_UA = USER_AGENT.MOBILE_IOS_SAFARI;
+
+export { IOS_UA, MOBILE_UA, PC_UA, UA, UC_UA };

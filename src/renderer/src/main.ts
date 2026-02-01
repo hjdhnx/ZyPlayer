@@ -1,24 +1,22 @@
+/* eslint-disable simple-import-sort/imports */
 import { createApp } from 'vue';
 
+import { print as consolePrint } from '@/utils/console';
+import { dom as initDom } from '@/utils/setup';
 import App from './App.vue';
+import i18n from './locales';
 import router from './router';
 import { store } from './store';
-import i18n from './locales';
 
-import 'tdesign-vue-next/es/style/index.css';
 import '@/style/index.less';
-import './permission';
+import 'tdesign-vue-next/es/style/index.css';
+
+initDom();
+consolePrint();
 
 const app = createApp(App);
-
 app.use(store);
 app.use(router);
 app.use(i18n);
 
-// app.mount('#app');
 app.mount('#app').$nextTick(window.removeLoading);
-// app.mount('#app').$nextTick(() => {
-//   setTimeout(() => {
-//     window.removeLoading(); // 确保这个方法在全局作用域可访问
-//   }, 1000); // 延迟1000毫秒（1秒）后执行
-// });

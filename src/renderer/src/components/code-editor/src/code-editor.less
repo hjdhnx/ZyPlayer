@@ -1,0 +1,28 @@
+.code-editor {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  div.icon-pointer {
+    cursor: pointer;
+  }
+
+  .monaco-editor,
+  .monaco-diff-editor,
+  .monaco-component {
+    * {
+      font-family: var(--td-font-family-code);
+    }
+
+    height: 100% !important;
+    width: 100% !important;
+
+    .find-widget {
+      & > .button.codicon-widget-close {
+        top: 8px;
+        right: 8px;
+      }
+    }
+  }
+}

@@ -1,11 +1,12 @@
-import { contextBridge } from 'electron';
+// import process from 'node:process';
+
 import { electronAPI } from '@electron-toolkit/preload';
-import { domReady } from './utils';
-import { useLoading } from './loading';
+import { contextBridge } from 'electron';
+
+import { domReady } from './utils/dom';
+import { useLoading } from './utils/loading';
 
 const { appendLoading, removeLoading } = useLoading();
-// @ts-ignore (define in dts)
-window.removeLoading = removeLoading;
 
 domReady().then(appendLoading);
 
@@ -19,12 +20,14 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI);
     contextBridge.exposeInMainWorld('api', api);
+    contextBridge.exposeInMainWorld('removeLoading', removeLoading);
   } catch (error) {
-    console.error(error);
+    console.error('[Preload]Failed to expose APIs:', error as Error);
   }
 } else {
-  // @ts-ignore (define in dts)
   window.electron = electronAPI;
-  // @ts-ignore (define in dts)
   window.api = api;
+  window.removeLoading = removeLoading;
 }
+
+export type WindowApiType = typeof api;

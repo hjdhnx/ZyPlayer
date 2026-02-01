@@ -1,126 +1,100 @@
 <template>
-  <div :class="['common-nav', isVisible.show ? 'show' : 'hidden']">
-    <div class="nav-sub" :style="{ display: isVisible.show ? 'block' : 'none' }">
-      <div class="nav-sub-tab nav-sub-tab-header">
-        <div class="header" v-if="!isVisible.search">
-          <p class="title">{{ title }}</p>
-          <t-popup :content="$t('pages.search.searchSource')">
-            <data-search-icon size="large" class="icon" v-if="search" @click="isVisible.search = true" />
-          </t-popup>
-        </div>
-        <div class="search" v-if="isVisible.search" ref="headerOutsideRef">
-          <t-input :placeholder="$t('pages.setting.placeholder.general')" clearable v-model="searchText"
-            @change="searchEvent">
-            <template #suffixIcon>
-              <search-icon :style="{ cursor: 'pointer' }" />
-            </template>
-          </t-input>
-        </div>
+  <div class="common-nav">
+    <div class="nav-sub" :class="{ 'nav-sub-hidden': !active.show }">
+      <div v-if="props.search" class="nav-sub-header">
+        <t-input v-model="searchValue" clearable class="nav-sub-input" @change="handleListFilter">
+          <template #prefix-icon><search-icon /></template>
+        </t-input>
       </div>
-      <div class="nav-sub-tab nav-sub-tab-content">
-        <div class="nav-sub-tab-top" ref="contentRef">
-          <ul class="nav-menu">
-            <li class="nav-menu-item" :class="`${activeData}` === `${item.id}` ? 'is-active' : ''"
-              v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)"
-              @contextmenu="conButtonClick(item, $event)">
-              <t-tooltip :content="item.name">
-                <div class="name-wrapper">
-                  <span>{{ item.name }}</span>
-                </div>
-              </t-tooltip>
-            </li>
-          </ul>
-        </div>
-        <div class="nav-sub-tab-bottom">
-          <slot name="customize"></slot>
-        </div>
+
+      <div class="nav-sub-content">
+        <t-list ref="listRef" class="list-wrap" :scroll="{ rowHeight: 35, threshold: 15, type: 'virtual' }">
+          <t-list-item
+            v-for="(item, index) in listData"
+            :key="index"
+            class="item-wrap"
+            :class="[activeData === item.id ? 'is-active' : '']"
+            @click="handleItemClick(item.id)"
+          >
+            <div class="list-item">
+              <template v-if="measureText(item.name) < width">
+                <div class="title txthide txthide1">{{ item.name }}</div>
+              </template>
+
+              <template v-else>
+                <t-tooltip attach=".common-nav" :z-index="3" destroy-on-close :content="item.name">
+                  <div class="title-wrap txthide txthide1">{{ item.name }}</div>
+                </t-tooltip>
+              </template>
+            </div>
+          </t-list-item>
+        </t-list>
+      </div>
+      <div class="nav-sub-footer">
+        <slot name="bottom"></slot>
       </div>
     </div>
 
-    <div class="nav-sub-tab-line" @click="isVisible.show = !isVisible.show">
-      <div class="nav-sub-tab-line-0"></div>
-      <div class="nav-sub-tab-line-1"></div>
-    </div>
+    <div v-show="active.show" class="dragbar"></div>
 
-    <context-menu v-model:show="isVisible.contentMenu" :options="optionsComponent" v-if="contextMenuItems">
-      <template v-for="(menuItem, index) in contextMenuItems" :key="index">
-        <context-menu-item v-if="menuItem.type === 'item'" :label="menuItem.label" @click="menuItem.handler" />
-        <context-menu-separator v-if="menuItem.type === 'separator'" />
-        <context-menu-group v-if="menuItem.type === 'group'" :label="menuItem.label">
-          <template v-for="(subItem, subIndex) in menuItem.children" :key="subIndex">
-            <context-menu-item v-if="subItem.type === 'item'" :label="subItem.label" @click="subItem.handler" />
-            <context-menu-separator v-if="subItem.type === 'separator'" />
-          </template>
-        </context-menu-group>
-      </template>
-    </context-menu>
+    <div class="pin-wrapper" @click="active.show = !active.show">
+      <div class="pin-icon-wrapper" :class="[active.show ? 'pin-icon-wrapper-show' : 'pin-icon-wrapper-hide']">
+        <caret-left-small-icon v-if="active.show" class="icon" />
+        <caret-right-small-icon v-else class="icon" />
+      </div>
+    </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
-
-import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
-import { onClickOutside } from '@vueuse/core';
-import Scrollbar from 'smooth-scrollbar';
-import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { onMounted, computed, reactive, ref, watch } from 'vue';
-
-import { useSettingStore } from '@/store';
-const storeSetting = useSettingStore();
-
-const props = withDefaults(defineProps<{
-  title: string;
-  search?: boolean;
-  active: any;
-  list: Array<{
-    id: string | number;
-    name: string;
-  }>;
-  contextMenuItems?: Array<{
-    type: 'item' | 'separator' | 'group';
-    label?: string;
-    handler?: () => void;
-    children?: Array<{
-      type: 'item' | 'separator';
-      label?: string;
-      handler?: () => void;
-    }>;
-  }>;
-}>(), {
-  search: false
+defineOptions({
+  name: 'CommonNav',
 });
 
-const activeData = ref(props.active);
-const listData = ref(props.list);
-const contextMenuItems = ref(props.contextMenuItems);
-const contentRef = ref(null);
-const headerOutsideRef = ref(null);
-const searchText = ref('');
-const isVisible = reactive({
-  contentMenu: false,
+const props = defineProps({
+  title: {
+    type: String,
+    default: '',
+  },
+  search: {
+    type: Boolean,
+    default: false,
+  },
+  active: {
+    type: String,
+    default: '',
+  },
+  list: {
+    type: Array<{ id: string; name: string }>,
+    default: () => [],
+  },
+});
+
+const emit = defineEmits(['change']);
+
+import { isStrEmpty, isString } from '@shared/modules/validate';
+import Fuse from 'fuse.js';
+import { CaretLeftSmallIcon, CaretRightSmallIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import type { ListInstanceFunctions } from 'tdesign-vue-next';
+import { onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
+
+const listRef = useTemplateRef<ListInstanceFunctions>('listRef');
+
+const activeData = ref<string>(props.active);
+const listData = ref<Array<{ id: string; name: string }>>(props.list);
+
+const searchValue = ref<string>('');
+const active = ref({
   search: false,
-  show: true
+  show: true,
 });
-const mode = computed(() => {
-  return storeSetting.displayMode;
-});
-const optionsComponent = ref({
-  zIndex: 15,
-  width: 160,
-  x: 500,
-  y: 200,
-  theme: mode.value === 'light' ? 'default' : 'mac dark',
-});
-
-onMounted(() => {
-  Scrollbar.init(contentRef.value!);
-});
+const width = ref<number>(114);
+const fuse = ref();
 
 watch(
   () => props.active,
   (val) => {
     activeData.value = val;
+    handleScroll();
   },
 );
 
@@ -128,286 +102,218 @@ watch(
   () => props.list,
   (val) => {
     listData.value = val;
+    fuseCollection();
+    handleScroll();
   },
 );
 
-watch(
-  () => props.contextMenuItems,
-  (val) => {
-    contextMenuItems.value = val;
-  },
-);
+onActivated(() => handleScroll());
 
-const emit = defineEmits(['changeKey', 'contextMenu']);
+onMounted(() => {
+  fuseCollection();
+  handleScroll();
+});
 
-if (props.search) {
-  onClickOutside(headerOutsideRef, () => {
-    isVisible.search = false;
-  })
-}
+const fuseCollection = () => {
+  const list = listData.value || [];
 
-const conButtonClick = (item: any, { x, y }: any) => {
-  isVisible.contentMenu = true;
-  Object.assign(optionsComponent.value, { x, y });
-  emit('contextMenu', { ...item });
+  if (fuse.value) {
+    fuse.value.setCollection(list);
+  } else {
+    fuse.value = new Fuse(list, { keys: ['name'], useExtendedSearch: true });
+  }
+};
+
+const measureText = (text: string): number => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  return ctx!.measureText(text).width;
 };
 
 const handleItemClick = (key: string | number) => {
-  console.log(`[nav] clicked key: ${key}`);
-  emit('changeKey', key);
+  emit('change', key);
 };
 
-const searchEvent = () => {
-  listData.value = props.list.filter((item) => {
-    return item.name.toLowerCase().includes(searchText.value.toLowerCase());
+const handleListFilter = () => {
+  const kw = searchValue.value?.trim() || '';
+  listData.value = isString(kw) && !isStrEmpty(kw) ? fuse.value.search(`'${kw}`).map((item) => item.item) : props.list;
+};
+
+const handleScroll = () => {
+  if (!listRef.value) return;
+
+  const id = activeData.value;
+  if (!id) return;
+
+  const list = listData.value;
+  if (list.length === 0) return;
+
+  const index = list.findIndex((item) => item.id === id) - 1;
+  if (index < 0) return;
+
+  listRef.value?.scrollTo?.({
+    index,
+    behavior: 'smooth',
   });
 };
 </script>
-
 <style lang="less" scoped>
 .common-nav {
   height: 100%;
   width: fit-content;
   position: relative;
-  padding-right: var(--td-comp-margin-s);
 
   .nav-sub {
     height: 100%;
-    min-width: 162px;
-    // width: fit-content;
-    padding: var(--td-comp-paddingTB-xs) 0;
-    background-color: var(--td-bg-color-container);
-    border-radius: var(--td-radius-default);
-    transition: all .3s ease;
+    width: 162px;
+    padding-left: var(--td-comp-paddingLR-s);
+    will-change: width;
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-size-4);
+    overflow: hidden;
+    transition: all 0.25s ease-in-out;
 
-    .nav-sub-tab-header {
-      margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
-
-      .header {
-        display: flex;
-        align-items: center;
-        height: 32px;
-        transition: all 0.25s ease-in-out;
-
-        .title {
-          padding-left: var(--td-comp-paddingTB-s);
-          font-weight: 700;
-          font-size: 1.5em;
-        }
-
-        .icon {
-          margin-left: auto;
-          margin-right: var(--td-comp-margin-s);
-          cursor: pointer;
-        }
-      }
-
-      .search {
-        transition: all 0.25s ease-in-out;
-
-        :deep(.t-input) {
-          background-color: var(--td-bg-content-input-2);
-          border: none;
-          outline: none;
-          width: 148px;
-        }
-
-        :deep(.t-input--focused) {
-          box-shadow: none;
-          color: none;
-        }
-      }
+    &-hidden {
+      width: 0;
+      padding: var(--td-comp-paddingTB-s) 0;
     }
 
-    .nav-sub-tab-content {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: space-between;
-      height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
+    .nav-sub-header {
+      width: 100%;
+      height: fit-content;
+      flex: 0 0 auto;
+      padding-right: var(--td-comp-paddingLR-s);
+    }
 
-      .nav-sub-tab-top {
-        // overflow-y: auto;
-        // overflow-x: hidden;
-        width: 100%;
-        // padding-left: var(--td-comp-paddingTB-s);
+    .nav-sub-content {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      overflow: hidden;
 
-        .nav-menu {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          font-size: 14px;
-          line-height: 1.5;
+      .list-wrap {
+        height: 100%;
+        overflow-y: scroll;
 
-          .nav-menu-item {
-            width: 148px;
-            height: 40px;
-            transition: background-color .3s ease;
+        :deep(.item-wrap) {
+          width: 100%;
+          height: calc(var(--td-comp-size-m) + 2px);
+          padding: 0;
+          cursor: pointer;
+          margin-bottom: 1px;
+
+          &::after {
+            content: none;
+          }
+
+          &:last-of-type {
+            margin-bottom: 0;
+          }
+
+          .list-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: var(--td-comp-size-m);
+            flex: 1;
+            padding: 0 var(--td-comp-paddingTB-s);
             border-radius: var(--td-radius-medium);
 
-
-            &:not(:first-child) {
-              margin-top: var(--td-comp-margin-xs);
-            }
-
-            &:hover {
-              background-color: var(--td-bg-content-hover-2);
-            }
-
-            .name-wrapper {
-              height: 100%;
+            .title {
               width: 100%;
-              padding: 0 var(--td-comp-paddingTB-s);
-              line-height: 14px;
-              display: flex;
-              align-items: center;
-              color: var(--td-text-color-primary);
-              cursor: pointer;
-
-              span {
-                overflow: hidden;
-                display: inline-block;
-                white-space: nowrap;
-                // text-overflow: ellipsis;
-              }
+              flex: 1;
             }
           }
 
-          .is-active {
-            background-color: var(--td-bg-content-active-2);
+          &:hover {
+            .list-item {
+              background-color: var(--td-bg-color-component-hover);
+            }
+          }
+        }
+
+        .is-active {
+          .list-item {
+            background-color: var(--td-bg-color-component-hover);
           }
         }
       }
+    }
 
-      .nav-sub-tab-bottom {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        padding-top: var(--td-comp-paddingTB-xs);
-      }
+    .nav-sub-footer {
+      width: 100%;
+      height: fit-content;
+      flex: 0 0 auto;
     }
   }
-}
 
-.show {
-  .nav-sub-tab-line {
-    width: 12px;
-    height: 26px;
+  .dragbar {
     position: absolute;
-    right: -2px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    transition: all .2s ease;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    right: -6px;
+    width: 6px;
+    user-select: none;
 
-    .nav-sub-tab-line-0 {
-      width: 4px;
-      height: 13px;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      background-color: var(--td-bg-color-component-hover);
-      left: 4px;
+    &::after,
+    &::before {
+      content: '';
+      position: absolute;
       top: 0;
-      position: absolute;
-      transition: all .2s ease;
-      transform-origin: 50% 0;
-    }
-
-    .nav-sub-tab-line-1 {
-      width: 4px;
-      height: 13px;
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
-      background-color: var(--td-bg-color-component-hover);
-      left: 4px;
       bottom: 0;
-      position: absolute;
-      transition: all .2s ease;
-      transform-origin: 50% 100%;
+      background: linear-gradient(
+        180deg,
+        transparent,
+        color-mix(in srgb, var(--td-text-color-primary) 10%, transparent) 50%,
+        transparent
+      );
     }
 
-    &:hover {
-      .nav-sub-tab-line-0 {
-        background-color: var(--td-bg-color-component-active);
-        transform-origin: 50% 0%;
-        transform: rotate(5deg) translateY(1px);
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        border-bottom-left-radius: 10px;
-        height: 16px;
-      }
+    &::before {
+      right: 0;
+      transition: all 0.2s ease-in-out;
+    }
 
-      .nav-sub-tab-line-1 {
-        background-color: var(--td-bg-color-component-active);
-        transform-origin: 50% 100%;
-        transform: rotate(-5deg) translateY(-1px);
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        border-top-left-radius: 10px;
-        height: 16px;
-      }
+    &::after {
+      transition: background-color 0.2s ease-in-out;
+      right: 6px;
+      width: 1px;
     }
   }
-}
 
-.hidden {
-  .nav-sub-tab-line {
-    width: 12px;
-    height: 26px;
+  .pin-wrapper {
     position: absolute;
-    right: -2px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    transition: all .2s ease;
+    z-index: 8;
+    right: 0;
+    top: 0;
+    width: 1px;
+    height: 100%;
 
-    .nav-sub-tab-line-0 {
-      width: 4px;
-      height: 13px;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      background-color: var(--td-bg-color-component-hover);
-      left: 4px;
-      top: 0;
+    .pin-icon-wrapper {
       position: absolute;
-      transition: all .2s ease;
-      transform-origin: 50% 0;
-    }
+      top: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      width: 14px;
+      border: 1px solid var(--td-border-level-2-color);
+      box-shadow: var(--td-shadow-2);
+      background-color: var(--td-bg-color-container);
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: all 0.25s ease-in-out;
 
-    .nav-sub-tab-line-1 {
-      width: 4px;
-      height: 13px;
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
-      background-color: var(--td-bg-color-component-hover);
-      left: 4px;
-      bottom: 0;
-      position: absolute;
-      transition: all .2s ease;
-      transform-origin: 50% 100%;
-    }
-
-    &:hover {
-      .nav-sub-tab-line-0 {
-        background-color: var(--td-bg-color-component-active);
-        transform-origin: 50% 0%;
-        transform: rotate(-5deg) translateY(1px);
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        border-bottom-right-radius: 10px;
-        height: 16px;
+      &-show {
+        border-radius: var(--td-radius-large);
+        right: calc(0px - var(--td-size-3));
       }
 
-      .nav-sub-tab-line-1 {
-        background-color: var(--td-bg-color-component-active);
-        transform-origin: 50% 100%;
-        transform: rotate(5deg) translateY(-1px);
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        border-top-right-radius: 10px;
-        height: 16px;
+      &-hide {
+        border-radius: 0 var(--td-radius-large) var(--td-radius-large) 0;
+        right: calc(0px - var(--td-size-5));
       }
     }
   }

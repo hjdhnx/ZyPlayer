@@ -1,104 +1,74 @@
 <template>
-  <router-view></router-view>
-  <disclaimer-view v-model:visible="isVisible.dialogDisclaimer" />
+  <t-config-provider :global-config="getComponentsLocale">
+    <router-view />
+    <disclaimer-view type="init" />
+  </t-config-provider>
 </template>
-
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import type { ISetup } from '@shared/config/tblSetting';
+import { setupObj as tblSetup } from '@shared/config/tblSetting';
+import { onMounted, ref, watch } from 'vue';
 
-import { localeConfigKey } from '@/locales/index';
+import { fetchSetup } from '@/api/setting';
 import { useLocale } from '@/locales/useLocale';
-import { usePlayStore, useSettingStore } from '@/store';
-import { setup } from '@/api/setting';
-import PLAY_CONFIG from '@/config/play';
-import { autoSync } from '@/utils/webdev';
-import { loadExternalResource } from '@/utils/tool';
-
 import DisclaimerView from '@/pages/Disclaimer.vue';
+import { usePlayerStore, useSettingStore } from '@/store';
+import { start as startOSpy, stop as stopOSpy } from '@/utils/ospy';
+import { start as startVitals, stop as stopVitals } from '@/utils/vitalsObserver';
 
-const storePlayer = usePlayStore();
+const storePlayer = usePlayerStore();
 const storeSetting = useSettingStore();
-const { changeLocale } = useLocale();
 
-const isVisible = reactive({
-  dialogDisclaimer: false
-})
+const { getComponentsLocale } = useLocale();
 
-const theme = computed(() => {
-  return storeSetting.getStateMode;
+const setupConf = ref<ISetup>(tblSetup);
+
+const active = ref({
+  disclaimer: false,
 });
 
-const webdev = computed(() => {
-  return storeSetting.webdev;
-});
-
-const intervalId = ref();
-
 watch(
-  () => webdev.value,
+  () => ({
+    theme: storeSetting.theme,
+    lang: storeSetting.lang,
+    debug: storeSetting.debug,
+  }),
   (val) => {
-    if (intervalId.value) clearInterval(intervalId.value);
-    if (val.sync) {
-      intervalId.value = setInterval(() => {
-        autoSync(val.data.url, val.data.username, val.data.password);
-      }, 1000 * 5 * 60);
-    }
-  }, { deep: true }
-);
-watch(
-  () => storeSetting.displayMode,
-  (val) => {
-    const isDarkMode = val === 'dark';
-    document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
-  }
-);
-watch(
-  () => useLocalStorage(localeConfigKey, 'zh_CN').value,
-  (val) => {
-    changeLocale(val);
-  }
+    if (val.theme !== setupConf.value?.theme) storeSetting.changePreferredTheme();
+    if (val.lang !== setupConf.value?.lang) storeSetting.changePreferredLang();
+    if (val.debug !== setupConf.value?.debug) debugMode(val.debug);
+  },
+  { deep: true },
 );
 
-onMounted(() => {
-  initConfig();
-});
+onMounted(() => setup());
 
-const initConfig = async () => {
-  const { agreementMask, theme, playerMode, webdev, barrage, timeout, debug } = await setup();
+const setup = () => {
+  syncStore();
+};
 
-  storeSetting.updateConfig({ mode: theme });
-  storeSetting.updateConfig({ webdev: webdev });
-  storeSetting.updateConfig({ timeout: timeout || 5000 });
-  isVisible.dialogDisclaimer = !agreementMask;
+const syncStore = async () => {
+  const resp = await fetchSetup();
+  const { barrage, bossKey, debug, disclaimer, lang, player, theme, timeout } = resp;
 
-  const init = {
-    ...PLAY_CONFIG.setting,
-  };
-  init.playerMode = playerMode;
-  init.barrage = barrage;
-  storePlayer.updateConfig({ setting: init });
+  setupConf.value = resp;
 
-  if (debug) {
-    const status = await loadExternalResource('https://test.jikejishu.com/page-spy/index.min.js', 'js');
-    console.log(status)
-    if (status) {
-      window.$pageSpy = new PageSpy({
-        api: 'test.jikejishu.com',
-        clientOrigin: 'https://test.jikejishu.com',
-        project: 'zyplayer',
-        autoRender: true,
-        title: 'zyplayer for debug',
-      });
-    }
+  // privacy policy
+  active.value.disclaimer = !disclaimer;
+
+  // setting store sync config
+  storeSetting.updateConfig({ bossKey, debug, lang, theme, timeout: timeout || 5000 });
+  // play store sync config
+  storePlayer.updateConfig({ barrage, player });
+};
+
+const debugMode = (type: boolean) => {
+  if (type) {
+    startVitals();
+    startOSpy();
+  } else {
+    stopVitals();
+    stopOSpy();
   }
-}
-
-window.electron.ipcRenderer.on('system-theme-updated', (_, activeTheme) => {
-  if (theme.value === 'auto') {
-    const themeMode = activeTheme === 'dark' ? 'dark' : '';
-    document.documentElement.setAttribute('theme-mode', themeMode);
-    console.log(`system-theme-updated: ${activeTheme}`);
-  }
-})
+};
 </script>
