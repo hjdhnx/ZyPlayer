@@ -158,10 +158,7 @@ const handleInstall = () => {
 };
 
 const handleOpenDownLink = () => {
-  window.electron.ipcRenderer.invoke(
-    IPC_CHANNEL.OPEN_WEBSITE,
-    'https://github.com/Hiram-Wong/ZyPlayer/releases/latest',
-  );
+  window.electron.ipcRenderer.invoke(IPC_CHANNEL.OPEN_WEBSITE, 'https://github.com/Hiram-Wong/zyfun/releases/latest');
 };
 
 const handleDownStart = () => {

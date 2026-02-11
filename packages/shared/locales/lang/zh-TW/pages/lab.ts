@@ -156,15 +156,14 @@ export default {
       data: '數據',
     },
     message: {
-      modeT4: 'T4模式需配合插件使用, 請先確認已安裝插件, 且插件目錄為drpy-node, 並啟動運行狀態',
-      modeT3py: 'T3-Py模式需配合python環境使用, 請先確認已安裝python環境, 並安裝依賴',
+      noInitSource: '自動化流程失敗, 請按幫助手動創建debug源, 並刷新頁面',
       codeNoData: '編輯器內容為空',
       htmlNoData: '源代碼內容為空',
     },
     placeholder: {
       pdfa: '請輸入列表規則(如 body&&li)',
       pdfh: '請輸入節點規則(如 body&&a,0&&href)',
-      proxyUpload: '請輸入三元組, [響應嗎, 響應頭, 響應體]',
+      proxyUpload: '請輸入三元組, [響應碼, 響應頭, 響應體]',
     },
   },
   sift: {

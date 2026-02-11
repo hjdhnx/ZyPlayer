@@ -7,7 +7,7 @@ import { loggerService } from '@logger';
 import { fileChmod, filePermission, pathExist } from '@main/utils/file';
 import { HOME_BIN_PATH } from '@main/utils/path';
 import { getBinaryName } from '@main/utils/process';
-import { arch, isWindows } from '@main/utils/systeminfo';
+import { isWindows } from '@main/utils/systeminfo';
 import { getTimeout, getUserAgent } from '@main/utils/tool';
 import { LOG_MODULE } from '@shared/config/logger';
 import { headersPascalCase } from '@shared/modules/headers';
@@ -75,10 +75,6 @@ export class FFmpegService {
   public async prepare(): Promise<void> {
     try {
       if (this.ffmpeg) return;
-
-      if (isWindows && arch === 'arm_64') {
-        throw new Error(`FFmpeg not support: windows ${arch}`);
-      }
 
       const ffmpegPath = join(HOME_BIN_PATH, getBinaryName('ffmpeg'));
       const ffprobePath = join(HOME_BIN_PATH, getBinaryName('ffprobe'));

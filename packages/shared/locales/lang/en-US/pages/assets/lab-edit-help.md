@@ -1,4 +1,7 @@
-- Editor: If you get a lot of syntax errors, switch to another adapter and back again.
+- Init
+  - The ext parameter will be lost every time it is initialized, to use the ext parameter you need to go to [Setting -> Film Config] to configure the debug source manually.
+  - If the debug source doesn't exist, you can refresh the page or go to [Setting -> Film Config] to manually create a debug source (the id field must be debug, others are optional).
+- Editor: If you get a lot of syntax errors, switch to another adapter and reselect it.
 - Logger: Some adapters do not support log output.
 - Adapter
   - T4: Go to [Lab->Extension Manager->Plugin] install the corresponding module

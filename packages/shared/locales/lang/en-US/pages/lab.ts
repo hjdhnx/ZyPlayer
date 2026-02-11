@@ -156,15 +156,15 @@ export default {
       data: 'Data',
     },
     message: {
-      modeT4: 'T4 mode requires plugin, please check plugin(directory is drpy-node), and start the plugin',
-      modeT3py: 'T3-Py mode requires python env, please check python env is installed, and install the dependencies',
+      noInitSource:
+        'Automation process failed, please manually create a debug source as per the help and refresh the page',
       codeNoData: 'Editor content is empty',
       htmlNoData: 'HTML content is empty',
     },
     placeholder: {
       pdfa: 'Please enter list rule (e.g. body&&li)',
       pdfh: 'Please enter node rule (e.g. body&&a,0&&href)',
-      proxyUpload: 'Please enter a triple, [response, response header, response body]',
+      proxyUpload: 'Please enter a triple, [response code, response header, response body]',
     },
   },
   sift: {

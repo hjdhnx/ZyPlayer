@@ -42,15 +42,15 @@
       </t-form-item>
       <t-form-item :label="$t('pages.film.title')" name="site">
         <t-space align="center">
-          <t-select v-model="formData.site.searchMode" :label="$t('common.search')" :style="{ width: '296px' }">
+          <t-select v-model="formData.site.searchMode" :label="$t('common.search')" :style="{ width: '140px' }">
             <t-option value="site" :label="$t('pages.setting.base.site.searchMap.local')"></t-option>
             <t-option value="group" :label="$t('pages.setting.base.site.searchMap.group')"></t-option>
             <t-option value="all" :label="$t('pages.setting.base.site.searchMap.all')"></t-option>
           </t-select>
-          <!-- <t-select v-model="formData.site.filterMode" :label="$t('common.filter')" :style="{ width: '140px' }">
+          <t-select v-model="formData.site.filterMode" :label="$t('common.filter')" :style="{ width: '140px' }">
             <t-option :value="true" :label="$t('common.enable')"></t-option>
             <t-option :value="false" :label="$t('common.disable')"></t-option>
-          </t-select> -->
+          </t-select>
         </t-space>
       </t-form-item>
       <t-form-item :label="$t('pages.live.title')" name="live">
@@ -430,7 +430,7 @@ const handleFactoryReset = () => {
     placement: 'center',
     closeBtn: '',
     onConfirm: async () => {
-      await dataDbClear({ types: '' });
+      await dataDbClear({ type: ['site', 'live', 'analyze', 'history', 'star', 'setting', 'plugin', 'cache'] });
       dialog.hide();
       handleReboot();
     },

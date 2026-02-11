@@ -156,15 +156,14 @@ export default {
       data: '数据',
     },
     message: {
-      modeT4: 'T4模式需配合插件使用, 请先确认已安装插件, 且插件目录为drpy-node, 并启动运行状态',
-      modeT3py: 'T3-Py模式需配合python环境使用, 请先确认已安装python环境, 并安装依赖',
+      noInitSource: '自动化流程失败, 请按帮助手动创建debug源, 并刷新页面',
       codeNoData: '编辑器内容为空',
       htmlNoData: '源代码内容为空',
     },
     placeholder: {
       pdfa: '请输入列表规则(如 body&&li)',
       pdfh: '请输入节点规则(如 body&&a,0&&href)',
-      proxyUpload: '请输入三元组, [响应吗, 响应头, 响应体]',
+      proxyUpload: '请输入三元组, [响应码, 响应头, 响应体]',
     },
   },
   sift: {

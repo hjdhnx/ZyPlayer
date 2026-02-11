@@ -53,6 +53,7 @@ type ITerminalConsoleLog = Exclude<LogLevel, 'verbose' | 'silly' | 'none'> | 'lo
 const terminalRef = useTemplateRef<HTMLElement>('terminalRef');
 
 const options = ref<ITerminalOptions>(props.options);
+const isSelecting = ref<boolean>(false);
 
 const term = ref<Terminal>();
 const fitAddon = ref<FitAddon>();
@@ -115,6 +116,10 @@ const setup = () => {
       props.onKeyCallback?.(key);
     });
 
+    terminal.onSelectionChange(() => {
+      isSelecting.value = terminal.hasSelection();
+    });
+
     resizeObserver.value = new ResizeObserver(() => {
       if (term.value && fitAddon.value) fitAddon.value.fit();
     });
@@ -150,6 +155,8 @@ const write = (val: unknown, level: ITerminalLog = LEVEL.VERBOSE, ln: boolean = 
   if (term.value) {
     if (prefix) term.value.write(prefix);
     ln ? term.value.writeln(text) : term.value.write(text);
+
+    if (!isSelecting.value) term.value.scrollToBottom();
   }
 
   if (props.console) {

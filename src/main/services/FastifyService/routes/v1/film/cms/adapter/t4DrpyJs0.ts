@@ -79,7 +79,7 @@ class T4DrpyJs0Adapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 
@@ -92,7 +92,7 @@ class T4DrpyJs0Adapter {
     const { data: resp } = await request.request({
       url: this.api,
       method: 'GET',
-      params: { ac: 'videolist', t: tid, pg: page, f: extend },
+      params: { ac: 'videolist', t: tid, pg: page, f: JSON.stringify(extend || {}) },
     });
 
     const pagecurrent = Number(resp?.page) || 1;
@@ -107,7 +107,7 @@ class T4DrpyJs0Adapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 
@@ -174,7 +174,7 @@ class T4DrpyJs0Adapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 
@@ -191,23 +191,35 @@ class T4DrpyJs0Adapter {
       params: { url: play },
     });
 
-    const qs = resp?.parse_extra;
-    const scriptObj = qs ? Object.fromEntries(new URLSearchParams(qs)) : {};
+    const VIP_LIST = [
+      'iqiyi.com',
+      'iq.com',
+      'mgtv.com',
+      'qq.com',
+      'youku.com',
+      'le.com',
+      'sohu.com',
+      'pptv.com',
+      'bilibili.com',
+      'tudou.com',
+    ];
+
+    const parsedUrl = resp?.url || '';
+    const parse = /\.(?:m3u8|mp4|mpd|flv|mkv)/.test(parsedUrl) ? 0 : 1;
+
+    let jx = 0;
+    try {
+      const { hostname } = new URL(parsedUrl);
+      if (VIP_LIST.some((item) => hostname.includes(item))) jx = 1;
+    } catch {}
 
     const res = {
-      url: resp?.url || '',
-      quality: resp.quality || [],
-      parse: resp.parse || 0,
-      jx: resp.jx || 0,
-      headers: resp?.header || resp?.headers || {},
-      script: Object.keys(scriptObj).length
-        ? {
-            ...(resp.js ? { runScript: resp.js } : {}),
-            ...(scriptObj.init_script ? { initScript: scriptObj.init_script } : {}),
-            ...(scriptObj.custom_regex ? { customRegex: scriptObj.custom_regex } : {}),
-            ...(scriptObj.sniffer_exclude ? { snifferExclude: scriptObj.sniffer_exclude } : {}),
-          }
-        : {},
+      url: parsedUrl,
+      quality: [],
+      parse,
+      jx,
+      headers: {},
+      script: {},
     };
 
     return res;

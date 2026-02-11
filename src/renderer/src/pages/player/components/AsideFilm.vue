@@ -954,10 +954,7 @@ emitter.on(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, () => {
   const state = getEpisodePlayState();
   if (!isBoolean(state?.isLast) || isNil(state?.nextIndex) || state?.nextIndex === -1) return;
 
-  const { filmSource } = active.value;
-  const nextInfo = infoConf.value[filmSource]?.[state.nextIndex];
-  if (isNil(nextInfo?.text) || isNil(nextInfo?.link)) return;
-
+  const nextInfo = state.nextInfo;
   handleSwitchSeason(nextInfo);
 });
 </script>

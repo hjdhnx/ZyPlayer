@@ -1,5 +1,5 @@
-- Click to install will be added to the task queue, no need to click to trigger multiple times, wait patiently.
-- Click the path to jump to the folder to check whether the installation is completed or not.
-- Some installations may require scientific internet access (limited by service provider).
-- Some binaries are only compatible with some operating systems (limited to three parties).
+- Click to install and it will be added to the task queue, no need to click multiple times to trigger, wait patiently.
+- If the installation takes too long, try refreshing the page and re-installing.
+- Some installations may require scientific internet access (limited by network provider).
+- Some binaries are only compatible with some operating systems (limited by service providers).
 - Check logs for specific reasons for failed installations.

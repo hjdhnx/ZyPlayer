@@ -13,7 +13,7 @@ export const APP_COPYRIGHT: string = `Copyright © ${new Date().getFullYear()} $
 export const WEBSITE_URL: string = pkg.homepage;
 export const ISSUE_URL: string = `${pkg.homepage}/issues`;
 export const DOCUMENT_URL: string = 'https://zy.catni.cn';
-export const PLUGIN_STORE_URL: string = 'https://github.com/Hiram-Wong/ZyPlayer/discussions/386';
+export const PLUGIN_STORE_URL: string = 'https://github.com/Hiram-Wong/zyfun/discussions/386';
 
 // App overlay
 export const titleBarOverlayDark = {

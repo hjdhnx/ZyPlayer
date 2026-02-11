@@ -1,0 +1,31 @@
+reject:
+  # Electron
+  - vite
+  - electron
+  - electron-builder
+  - electron-updater
+  - electron-store
+  - builder-util-runtime
+
+  # Libsql
+  - '@libsql/client'
+  - '@libsql/darwin-arm64'
+  - '@libsql/darwin-x64'
+  - '@libsql/linux-arm64-gnu'
+  - '@libsql/linux-x64-gnu'
+  - '@libsql/linux-arm64-musl'
+  - '@libsql/linux-x64-musl'
+  - '@libsql/win32-x64-msvc'
+  - '@strongtz/win32-arm64-msvc'
+
+  # Vitest
+  - vitest
+  - '@vitest/browser'
+  - '@vitest/coverage-v8'
+  - '@vitest/ui'
+  - '@vitest/web-worker'
+
+  # Others
+  - eslint
+  - monaco-editor
+  - undici

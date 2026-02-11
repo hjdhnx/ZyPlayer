@@ -51,7 +51,7 @@ export class PythonService {
       const requirementsPath = join(this.projectBasePath, 'requirements.txt');
 
       const cmd = (await pathExist(tomlPath))
-        ? [this.uvBinaryPath, 'sync']
+        ? [this.uvBinaryPath, 'sync', '--native-tls']
         : (await pathExist(requirementsPath))
           ? [this.uvBinaryPath, 'pip', 'install', '-r', 'requirements.txt']
           : isArray(pkgs) && !isArrayEmpty(pkgs)

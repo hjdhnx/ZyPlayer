@@ -1,5 +1,6 @@
 import type { IAigcProviderType, IPlayerType, IRecHotType, ISnifferType } from '@shared/config/setting';
 import type { ITheme } from '@shared/config/theme';
+import { USER_AGENT } from '@shared/config/userAgent';
 import type { ILang } from '@shared/locales';
 
 export const settingList = [
@@ -34,8 +35,7 @@ export const settingList = [
   { key: 'hardwareAcceleration', value: true },
   {
     key: 'ua',
-    value:
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+    value: USER_AGENT.PC_DARWIN_CHROME,
   },
   { key: 'proxy', value: { type: 'system', url: '', bypass: '' } },
   { key: 'dns', value: '' },

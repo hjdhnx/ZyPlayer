@@ -3,35 +3,35 @@
     <summary >🌐 Language</summary>
     <div>
       <div align="center">
-        <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=en">English</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=zh-CN">简体中文</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=zh-TW">繁體中文</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=ja">日本語</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=ko">한국어</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=hi">हिन्दी</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=th">ไทย</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=fr">Français</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=de">Deutsch</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=es">Español</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=it">Italiano</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=ru">Русский</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=pt">Português</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=nl">Nederlands</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=pl">Polski</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=ar">العربية</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=fa">فارسی</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=tr">Türkçe</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=vi">Tiếng Việt</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=id">Bahasa Indonesia</a>
-        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=ZyPlayer&lang=as">অসমীয়া</
+        <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=Hiram-Wong&project=zyfun&lang=as">অসমীয়া</
       </div>
     </div>
   </details>
 </div>
 
 <p align="center">
-  <a href="https://github.com/Hiram-Wong/ZyPlayer/releases">
-    <!-- <img src="https://github.com/Hiram-Wong/ZyPlayer/blob/main/build/icon.png?raw=true" width="150" height="150" alt="banner" /> -->
+  <a href="https://github.com/Hiram-Wong/zyfun/releases">
+    <!-- <img src="https://github.com/Hiram-Wong/zyfun/blob/main/build/icon.png?raw=true" width="150" height="150" alt="banner" /> -->
     <img width="128" src="https://s2.loli.net/2024/02/29/7Q1nVbhkHdSmo5D.png">
     <br>
   </a>
@@ -89,36 +89,42 @@ zyfun是一款免费、极简、全能的跨平台影音管家，一站式管理
 ## 💻 跨平台说明
 
 - **MacOS**:
-  - 提供 arm64(苹果芯片)/x64(英特尔芯片)架构安装包
   - 数据库/文件/插件/日志 路径: `~/Library/Application Support/zyfun/`
   - 二进制 路径: `~/.zy/bin/`
 - **Linux**:
-  - 提供 arm64/x64架构-image/deb安装包
   - 数据库/文件/插件/日志 路径: `~/.config/zyfun/`
   - 二进制 路径: `~/.zy/bin/`
 - **Windows**:
-  - 提供 arm64/x64架构安装包
   - 数据库/文件/插件/日志 路径: `%USERPROFILE%\AppData\Roaming\zyfun\`
   - 二进制 路径: `%USERPROFILE%\.zy\bin\`
   <!-- - **OpenHarmony**:
-  - 提供 arm64/x64架构安装包
   - 数据库/文件/插件/日志 路径: `/data/storage/zyfun/base/files/log`
   - 二进制 路径: `~/.zy/bin/`-->
 
 ## 🛠️ 下载安装
 
-> **最新发布版下载**: 访问 [GitHub Releases页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取
+> **开发版下载**: 需登录Github账号
 
-> **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions/workflows/nightly-build.yml) 获取, 需登录Github账号
+> **最低要求**: 和chromium内核要求保持一致
 
-### MacOS 安装后打开提示「文件已损坏」
+| 操作系统 | x64 | arm64 | loong64 | 发行版                                                                                                                                                                                                                      | 开发版                                                                            | 最低要求   |
+| :------: | :-: | :---: | :-----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------- |
+| Windows  | ✅  |  ✅   |   ➖    | [GitHub](https://github.com/Hiram-Wong/zyfun/releases)                                                                                                                                                                      | [GitHub](https://github.com/Hiram-Wong/zyfun/actions/workflows/nightly-build.yml) | >= win10   |
+|  MacOS   | ✅  |  ✅   |   ➖    | [GitHub](https://github.com/Hiram-Wong/zyfun/releases)                                                                                                                                                                      | [GitHub](https://github.com/Hiram-Wong/zyfun/actions/workflows/nightly-build.yml) | >= macOS12 |
+|  Linux   | ✅  |  ✅   |   ❌    | [GitHub](https://github.com/Hiram-Wong/zyfun/releases) <br/> [如意玲珑应用商店](https://store.linyaps.org.cn/) <br/> [AUR软件包](https://aur.archlinux.org/packages?O=0&SeB=nd&K=zyfun&outdated=&SB=p&SO=d&PP=50&submit=Go) | [GitHub](https://github.com/Hiram-Wong/zyfun/actions/workflows/nightly-build.yml) |            |
+| Harmony  | ❌  |  ❌   |   ➖    |                                                                                                                                                                                                                             |                                                                                   |
+
+<details>
+<summary>展开查看安装问题</summary>
+
+#### MacOS 安装后打开提示「文件已损坏」
 
 ```bash
 sudo spctl --master-disable
 sudo xattr -cr /Applications/zyfun.app
 ```
 
-### Linux Appimage运行失败
+#### Linux Appimage运行失败
 
 > Running as root without --no-sandbox is not supported
 
@@ -138,7 +144,7 @@ sudo apt-get install libfuse2
 xhost +
 ```
 
-### Linux deb包安装失败
+#### Linux deb包安装失败
 
 > Package libnss3-1d is not installed
 
@@ -152,7 +158,7 @@ sudo apt-get install libnss3-1d
 sudo apt-get install libxss1
 ```
 
-### Linux rpm包安装失败
+#### Linux rpm包安装失败
 
 > Dependency check failed libXScrnSaver is needed
 
@@ -167,6 +173,8 @@ sudo yum install libXScrnSaver
 sudo yum install xdg-utils
 ```
 
+</details>
+
 ## 📚 数据结构
 
 > 请严格按照数据结构导入数据, 避免不必要的报错(如数据字段类型不匹配)
@@ -178,8 +186,8 @@ sudo yum install xdg-utils
 {
   "analyze": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 唯一标识(UUID v4)，不可重复
-      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(建议不重复)
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 数据唯一uuid标识(不可重复)
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(不可重复)
       "name": "Parse", // 名称(展示用)
       "url": "https://xxx.top/?jx=", // <3.4.1 **弃用**> 解析源地址(仅兼容旧版本)
       "api": "https://xxx.top/?jx=", // <3.4.1 启用> 解析源地址(推荐使用)
@@ -194,8 +202,8 @@ sudo yum install xdg-utils
   ],
   "iptv": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 唯一标识(UUID v4)，不可重复
-      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(建议不重复)
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 数据唯一uuidv标识(不可重复)
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(不可重复)
       "name": "Iptv", // 名称(展示用)
       "url": "https://xxx.com/m3u/iptv.m3u", // <3.4.1 **弃用**> 直播源地址(仅兼容旧版本)
       "api": "https://xxx.com/m3u/iptv.m3u", // <3.4.1 启用> 直播源地址(推荐使用)
@@ -210,7 +218,7 @@ sudo yum install xdg-utils
   ],
   "channel": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 唯一标识(UUID v4)，不可重复
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 数据唯一uuidv4标识(不可重复)
       "name": "Channel", // 名称(展示用)
       "url": "https://xxx.com/m3u/iptv.m3u8", // <3.4.1 **弃用**> 播放地址(仅兼容旧版本)
       "api": "https://xxx.com/m3u/iptv.m3u8", // <3.4.1 启用> 播放地址(推荐使用)
@@ -223,8 +231,8 @@ sudo yum install xdg-utils
   ],
   "sites": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 唯一标识(UUID v4)，不可重复
-      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(建议不重复)
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 数据唯一uuidv4标识(不可重复)
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(不可重复)
       "name": "Film", // 名称(展示用)
       "api": "https://www.xxx.com/api.php/provide/vod/", // 接口地址
       "playUrl": "", // 配合解析去url地址
@@ -240,8 +248,8 @@ sudo yum install xdg-utils
   ],
   "drive": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 唯一标识(UUID v4)，不可重复
-      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(建议不重复)
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 数据唯一uuidv4标识(不可重复)
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // <3.4.0 启用> 业务唯一标识(不可重复)
       "name": "alist", // 名称(展示用)
       "server": "http://alist.xxx.pro/", // 网盘地址
       "showAll": false, // 是否展示全部(true=全部,false=仅视频)
@@ -401,16 +409,17 @@ sudo yum install xdg-utils
 - **产品设计**：参与设计讨论
 - **编写文档**：改进用户手册和指南
 - **社区参与**：加入讨论并帮助用户
+- **用爱发电**：支持项目发展(不限于资金,服务器等) <[kofi](https://ko-fi.com/hiramwong)> <[爱发电](https://ifdian.net/a/hiram)>
 
 [![][github-contributors-shield]][github-contributors-link]
 
 ## 🌟 Star历史
 
-<a href="https://www.star-history.com/#Hiram-Wong/ZyPlayer&Date">
+<a href="https://www.star-history.com/#Hiram-Wong/zyfun&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Hiram-Wong/zyfun&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Hiram-Wong/zyfun&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Hiram-Wong/zyfun&type=Date" />
  </picture>
 </a>
 
@@ -421,16 +430,16 @@ sudo yum install xdg-utils
 
 <!-- Links & Images -->
 
-[github-release-shield]: https://img.shields.io/github/v/release/Hiram-Wong/ZyPlayer?label=Release&logo=github
-[github-release-link]: https://github.com/Hiram-Wong/ZyPlayer/releases
-[github-nightly-shield]: https://img.shields.io/github/actions/workflow/status/Hiram-Wong/ZyPlayer/nightly-build.yml?label=NightlyBuild&logo=github
-[github-nightly-link]: https://github.com/Hiram-Wong/ZyPlayer/actions/workflows/nightly-build.yml
-[github-contributors-shield]: https://openomy.app/svg?repo=Hiram-Wong/ZyPlayer&chart=bubble&latestMonth=12
-[github-contributors-link]: https://openomy.app/github/Hiram-Wong/ZyPlayer
-[github-license-shield]: https://img.shields.io/github/license/Hiram-Wong/ZyPlayer?label=License&logo=gnu
-[github-license-link]: https://github.com/Hiram-Wong/ZyPlayer/blob/main/LICENSE
-[fossa-shield]: https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer.svg?type=shield
-[fossa-link]: https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer?ref=badge_shield
+[github-release-shield]: https://img.shields.io/github/v/release/Hiram-Wong/zyfun?label=Release&logo=github
+[github-release-link]: https://github.com/Hiram-Wong/zyfun/releases
+[github-nightly-shield]: https://img.shields.io/github/actions/workflow/status/Hiram-Wong/zyfun/nightly-build.yml?label=NightlyBuild&logo=github
+[github-nightly-link]: https://github.com/Hiram-Wong/zyfun/actions/workflows/nightly-build.yml
+[github-contributors-shield]: https://openomy.app/svg?repo=Hiram-Wong/zyfun&chart=bubble&latestMonth=12
+[github-contributors-link]: https://openomy.app/github/Hiram-Wong/zyfun
+[github-license-shield]: https://img.shields.io/github/license/Hiram-Wong/zyfun?label=License&logo=gnu
+[github-license-link]: https://github.com/Hiram-Wong/zyfun/blob/main/LICENSE.txt
+[fossa-shield]: https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2Fzyfun.svg?type=shield
+[fossa-link]: https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2Fzyfun?ref=badge_shield
 [sponsor-shield]: https://img.shields.io/badge/赞助支持-FF6699.svg?logo=githubsponsors&logoColor=white
 [sponsor-link]: https://ko-fi.com/hiramwong
 [telegram-shield]: https://img.shields.io/badge/IM-Telegram-0088CC?logo=telegram
@@ -439,17 +448,17 @@ sudo yum install xdg-utils
 <!-- Links & Images -->
 
 [readmex-shield]: https://raw.githubusercontent.com/CodePhiliaX/resource-trusteeship/main/readmex.svg
-[readmex-link]: https://readmex.com/Hiram-Wong/ZyPlayer
+[readmex-link]: https://readmex.com/Hiram-Wong/zyfun
 [deepwiki-shield]: https://deepwiki.com/badge.svg
-[deepwiki-link]: https://deepwiki.com/Hiram-Wong/ZyPlayer
+[deepwiki-link]: https://deepwiki.com/Hiram-Wong/zyfun
 [zread-shield]: https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff
-[zread-link]: https://zread.ai/Hiram-Wong/ZyPlayer
+[zread-link]: https://zread.ai/Hiram-Wong/zyfun
 
 <!-- Links & Images -->
 
 [rank-hellogithub-shield]: https://api.hellogithub.com/v1/widgets/recommend.svg?rid=c54bf4d457b64ee7a84fd1ea0b36419a
 [rank-hellogithub-link]: https://hellogithub.com/repository/Hunlongyu/ZY-Player
-[rank-trendshift-shield]: https://trendshift.io/api/badge/repositories/9742
-[rank-trendshift-link]: https://trendshift.io/repositories/9742
+[rank-trendshift-shield]: https://trendshift.io/api/badge/repositories/20293
+[rank-trendshift-link]: https://trendshift.io/repositories/20293
 [rank-producthunt-shield]: https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1019733&theme=light
 [rank-producthunt-link]: https://www.producthunt.com/products/zyfun?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-zyfun

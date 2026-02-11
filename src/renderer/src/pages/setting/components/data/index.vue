@@ -11,9 +11,9 @@
               <t-radio :value="DATA_SIMPLE_TYPE.CATVOD">
                 {{ $t('pages.setting.data.easyConfig.field.typeMap.catvod') }}
               </t-radio>
-              <!-- <t-radio :value="DATA_SIMPLE_TYPE.DRPY">
+              <t-radio :value="DATA_SIMPLE_TYPE.DRPY">
                 {{ $t('pages.setting.data.easyConfig.field.typeMap.drpy') }}
-              </t-radio> -->
+              </t-radio>
             </t-radio-group>
             <t-select
               v-model="importSimpleFormData.url"

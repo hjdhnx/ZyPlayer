@@ -148,7 +148,7 @@ export default {
       field: {
         typeMap: {
           catvod: 'Catvod',
-          drpy: 'Drpy',
+          drpy: 'Drpy(js0)',
           tvbox: 'Tvbox',
         },
       },

@@ -298,9 +298,7 @@ import { throttle } from 'es-toolkit';
 import JSON5 from 'json5';
 import { Pane, Splitpanes } from 'splitpanes';
 import { ClearFormatting1Icon } from 'tdesign-icons-vue-next';
-import type { MessageInstance } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import type { WatchStopHandle } from 'vue';
 import { computed, nextTick, onActivated, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -510,10 +508,6 @@ const dataLoading = ref({
 const templateNameList = ref<string[]>([]);
 const siteData = ref({} as IModels['site']);
 
-const alert = ref<Record<string, Promise<MessageInstance> | null>>({
-  debug: null,
-});
-const debugWatchStop = ref<WatchStopHandle | null>(null);
 const loggerAbortController = ref<any>(null);
 
 watch(
@@ -541,43 +535,22 @@ onDeactivated(() => deactivateDispose());
 
 const setup = async () => {
   await getSiteData();
+
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   active.value.type = siteData.value.type as ISiteType;
   editText.value.code = await readFile(active.value.type, 'silence');
-
   await connectLogger();
 };
 
 const activeSetup = async () => {
-  debugWatchStop.value = watch(
-    () => storeSetting.debug,
-    (val) => {
-      if (!val) {
-        alert.value.debug && MessagePlugin.close(alert.value.debug);
-        alert.value.debug = null;
-        return;
-      }
-
-      if (!alert.value.debug) {
-        alert.value.debug = MessagePlugin.warning({
-          content: t('common.alert.debugModuleConflict'),
-          duration: 0,
-          closeBtn: true,
-        });
-      }
-    },
-    { immediate: true },
-  );
-
   if (!isNil(siteData.value?.id)) await connectLogger();
 };
 
 const deactivateDispose = () => {
-  debugWatchStop.value?.();
-  debugWatchStop.value = null;
-
-  alert.value.debug && MessagePlugin.close(alert.value.debug);
-  alert.value.debug = null;
-
   disconnectLogger();
 };
 
@@ -615,9 +588,11 @@ const saveSiteData = async () => {
 const getSiteData = async () => {
   try {
     const resp = await fetchSiteDetailByKey(DEBUG_PREFIX);
-
-    const site = isNil(resp?.id) ? await saveSiteData() : resp;
-    siteData.value = site;
+    if (!isNil(resp?.id)) {
+      siteData.value = resp;
+    } else {
+      await saveSiteData();
+    }
   } catch (error) {
     console.error('Fail to get site data', error);
     siteData.value = {} as IModels['site'];
@@ -884,6 +859,11 @@ const handleDomDebugPdfh = async () => {
 
 // data
 const handleDataDebugInit = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.init = true;
   try {
     const uuid = siteData.value.id;
@@ -909,6 +889,11 @@ const handleDataDebugInit = async () => {
 };
 
 const handleDataDebugHome = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.home = true;
   try {
     const uuid = siteData.value.id;
@@ -932,6 +917,11 @@ const handleDataDebugHome = async () => {
 };
 
 const handleDataDebugHomeVod = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.homeVod = true;
   try {
     const uuid = siteData.value.id;
@@ -955,6 +945,11 @@ const handleDataDebugHomeVod = async () => {
 };
 
 const handleDataDebugCategory = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.category = true;
   try {
     const { tid, filter = '{}', page = 1 } = dataFormData.value.category;
@@ -992,6 +987,11 @@ const handleDataDebugCategory = async () => {
 };
 
 const handleDataDebugDetail = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.detail = true;
   try {
     const { ids } = dataFormData.value.detail;
@@ -1021,6 +1021,11 @@ const handleDataDebugDetail = async () => {
 };
 
 const handleDataDebugSearch = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.search = true;
   try {
     const { wd, page = 1 } = dataFormData.value.search;
@@ -1050,6 +1055,11 @@ const handleDataDebugSearch = async () => {
 };
 
 const handleDataDebugPlay = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.play = true;
   try {
     const { flag, play } = dataFormData.value.play;
@@ -1085,6 +1095,11 @@ const handleDataDebugPlay = async () => {
 };
 
 const handleDataDebugProxy = async () => {
+  if (isNil(siteData.value?.id)) {
+    MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
+    return;
+  }
+
   dataLoading.value.proxy = true;
   try {
     const { url } = dataFormData.value.proxy;

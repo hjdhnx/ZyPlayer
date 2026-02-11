@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url';
+
 import { base64 } from '@shared/modules/crypto';
 import { isArray, isFunction, isJsonStr, isNil } from '@shared/modules/validate';
 import workerpool from 'workerpool';
@@ -33,7 +35,8 @@ const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> 
     };
 
     if (code.includes('assets://js/lib/')) {
-      code = code.replaceAll('assets://js/lib', `file://${libPath}`);
+      const libUrl = pathToFileURL(libPath).href;
+      code = code.replaceAll('assets://js/lib', libUrl);
     }
 
     const dataUri = `data:text/javascript;base64,${base64.encode({ src: code })}`;

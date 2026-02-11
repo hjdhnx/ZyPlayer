@@ -6,7 +6,7 @@ const ROOT_DIR = path.join(__dirname, '..');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'CHANGELOG.md');
 
 const owner = 'Hiram-Wong';
-const repo = 'ZyPlayer';
+const repo = 'zyfun';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const PER_PAGE = 100;
 

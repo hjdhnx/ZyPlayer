@@ -121,11 +121,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           vod_pic: v.vod_pic ?? '',
           vod_remarks: formatInfoContent(v.vod_remarks ?? ''),
           vod_blurb: formatInfoContent(v.vod_blurb ?? ''),
-          vod_tag: v.vod_tag || 'file',
+          vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
         }));
-      const pagecurrent = Number.parseInt(String(resp?.page)) || 1;
-      const pagecount = Number.parseInt(String(resp?.pagecount)) || 0;
-      const total = Number.parseInt(String(resp?.total)) || 0;
+      const pagecurrent = Number(resp?.page) || 1;
+      const pagecount = Number(resp?.pagecount) || 0;
+      const total = Number(resp?.total) || 0;
 
       const res = { page: pagecurrent, pagecount, total, list: videos } as ICmsHomeVod;
 
@@ -157,7 +157,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           vod_pic: v.vod_pic ?? '',
           vod_remarks: formatInfoContent(v.vod_remarks ?? ''),
           vod_blurb: formatInfoContent(v.vod_blurb ?? ''),
-          vod_tag: v.vod_tag || 'file',
+          vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
         }));
       const pagecurrent = Number(resp?.page) || page;
       const pagecount = Number(resp?.pagecount) || 0;
@@ -229,7 +229,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           vod_pic: v.vod_pic ?? '',
           vod_remarks: formatInfoContent(v.vod_remarks ?? ''),
           vod_blurb: formatInfoContent(v.vod_blurb ?? ''),
-          vod_tag: v.vod_tag || 'file',
+          vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
         }));
       const pagecurrent = Number(resp?.page) || page;
       const pagecount = Number(resp?.pagecount) || 0;

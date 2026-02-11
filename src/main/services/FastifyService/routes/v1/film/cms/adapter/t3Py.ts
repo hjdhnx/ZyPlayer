@@ -123,7 +123,7 @@ class ConnectService extends PythonService {
     this.checkBinary();
     await this.installDep();
 
-    const args = ['main.py', '--ctrl-port', String(this.ctrlPort)];
+    const args = [this.uvBinaryPath, 'run', 'main.py', '--ctrl-port', String(this.ctrlPort)];
 
     const pids = await this.matchProcess(args.join(' '));
 
@@ -159,7 +159,7 @@ class ConnectService extends PythonService {
       }
 
       if (!this.pids.length) {
-        const args = ['main.py', '--ctrl-port', String(this.ctrlPort)];
+        const args = [this.uvBinaryPath, 'run', 'main.py', '--ctrl-port', String(this.ctrlPort)];
         const pids = await this.matchProcess(args.join(' '));
         if (pids.length) this.pids = pids;
       }
@@ -273,7 +273,7 @@ export class T3PyAdapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 
@@ -296,7 +296,7 @@ export class T3PyAdapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 
@@ -354,7 +354,7 @@ export class T3PyAdapter {
         vod_pic: v.vod_pic ?? '',
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb ?? '')?.trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 

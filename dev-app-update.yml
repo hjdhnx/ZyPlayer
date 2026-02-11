@@ -1,4 +1,4 @@
 provider: github
 owner: Hiram-Wong
-repo: ZyPlayer
+repo: zyfun
 updaterCacheDirName: zyfun-updater

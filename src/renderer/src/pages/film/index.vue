@@ -341,7 +341,7 @@ const getCmsCategory = async (source: IModels['site']): Promise<number> => {
     uuid: source.id,
     tid,
     page: pageIndex,
-    extend: String(JSON.stringify(f)),
+    extend: JSON.stringify(f),
   });
 
   if (isArray(resp.list) && !isArrayEmpty(resp.list)) {
@@ -356,60 +356,77 @@ const getCmsCategory = async (source: IModels['site']): Promise<number> => {
 const loadMoreCategory = async (): Promise<number> => {
   const source = config.value.default;
 
+  // Load class only once
   if (!isArray(classList.value) || isArrayEmpty(classList.value)) {
     const length = await getCmsHome(source);
-    if (length < 1) active.value.loadStatus = 'error';
+    if (length < 1) {
+      active.value.loadStatus = 'error';
+      return 0;
+    }
+  }
+
+  // Load category data
+  const length = await getCmsCategory(source);
+  if (length > 0) {
+    pagination.value.pageIndex++;
     return length;
   }
 
-  return await getCmsCategory(source);
+  return 0;
 };
 
 const loadMoreSearch = async (): Promise<number> => {
   const { pageIndex } = pagination.value;
-  const searchCurrentId = active.value.searchCurrent;
   const searchSiteList = config.value.searchList;
-  const searchCurrentIndex = searchSiteList.findIndex((item) => item.id === searchCurrentId);
-  const isLastSearchSite = searchCurrentIndex + 1 >= searchSiteList.length;
+  const currentSiteId = active.value.searchCurrent;
+  const siteIndex = searchSiteList.findIndex((item) => item.id === currentSiteId);
+  const currentSite = searchSiteList[siteIndex];
+
+  const isLastSite = siteIndex + 1 >= searchSiteList.length;
 
   const switchNextSearchSite = (): number => {
     resetPagination();
 
-    if (isLastSearchSite) {
-      return 0;
-    } else {
-      active.value.searchCurrent = searchSiteList[searchCurrentIndex + 1].id;
-      return 1;
-    }
+    if (isLastSite) return 0;
+
+    active.value.searchCurrent = searchSiteList[siteIndex + 1].id;
+    return 1;
   };
 
   try {
-    if (isLastSearchSite) return 0;
-
     const resp = await fetchCmsSearch({
-      uuid: searchCurrentId,
+      uuid: currentSiteId,
       wd: searchValue.value,
       page: pageIndex,
     });
+
+    if (isArray(resp.list) && !isArrayEmpty(resp.list) && config.value.extra.filter) {
+      resp.list = resp.list.filter((item: ICmsInfo) => item.vod_name.includes(searchValue.value));
+    }
 
     if (!isArray(resp.list) || isArrayEmpty(resp.list)) {
       return switchNextSearchSite();
     }
 
-    resp.list = differenceBy(resp.list, filmList.value, (item: ICmsInfo) => item.vod_id);
-    if (isArrayEmpty(resp.list)) {
+    const normalizedList = resp.list.map((item: ICmsInfo) => ({
+      ...item,
+      relateSite: currentSite,
+    }));
+
+    const uniqueList = differenceBy(
+      normalizedList,
+      filmList.value,
+      (item: ICmsInfo & { relateSite: IModels['site'] }) => `${item.relateSite?.id ?? '0'}-${item.vod_id}`,
+    );
+
+    if (isArrayEmpty(uniqueList)) {
       return switchNextSearchSite();
     }
 
-    filmList.value.push(
-      ...resp.list.map((item) => ({
-        ...item,
-        relateSite: searchSiteList[searchCurrentIndex],
-      })),
-    );
-
+    filmList.value.push(...uniqueList);
     pagination.value.pageIndex++;
-    return resp.list;
+
+    return uniqueList.length;
   } catch (error) {
     console.error('Failed to load search data:', error);
     return switchNextSearchSite();
@@ -425,13 +442,22 @@ const loadMore = async ($state: ILoadStateHdandler) => {
 
     const length = searchValue.value ? await loadMoreSearch() : await loadMoreCategory();
 
-    if (length === 0) {
+    // Dynamic remove reccommend class
+    if (
+      !searchValue.value &&
+      length === 0 &&
+      filmList.value.length === 0 &&
+      classList.value.length > 1 &&
+      (active.value.folder || active.value.class) === ''
+    ) {
+      classList.value.shift();
+      active.value.class = classList.value[0].type_id;
       resetPagination();
-      $state.complete();
-    } else {
-      pagination.value.pageIndex++;
-      $state.loaded();
+      infiniteId.value = Date.now();
+      return;
     }
+
+    length === 0 ? $state.complete() : $state.loaded();
   } catch (error) {
     console.error(`Failed to load more data:`, error);
     $state.error();
@@ -537,11 +563,12 @@ const handleCmsTagFolder = (doc: ICmsInfo) => {
 const handleCmsTagAction = (_doc: ICmsInfo) => {};
 
 const handleSearch = async () => {
+  resetPagination();
+
   filmList.value = [];
   classList.value = [];
   filterData.value = {};
-  active.value.searchCurrent = config.value.searchList?.[0]?.id || '';
-  resetPagination();
+
   infiniteId.value = Date.now();
 };
 
@@ -553,6 +580,7 @@ const onSearchRecommend = (eventData: { source: string; data: any }) => {
   if (source === emitterSource.PAGE_SHOW) return;
 
   searchValue.value = kw;
+
   config.value.extra.filter = filter;
   config.value.extra.search = group;
   config.value.searchList = collateSearchSite(group, config.value.default);
@@ -561,6 +589,7 @@ const onSearchRecommend = (eventData: { source: string; data: any }) => {
     MessagePlugin.warning(t('pages.film.message.noEffectiveSearchSource'));
     return;
   }
+  active.value.searchCurrent = config.value.searchList[0].id;
 
   handleSearch();
 };
@@ -598,8 +627,6 @@ const defaultConfig = () => {
   folderBreadcrumb.value = [];
 
   config.value.default = {} as IModels['site'];
-
-  infiniteId.value = Date.now();
 };
 
 const reloadConfig = async (eventData: { source: string; data: any }) => {
@@ -608,6 +635,8 @@ const reloadConfig = async (eventData: { source: string; data: any }) => {
 
   defaultConfig();
   await getSetting();
+
+  infiniteId.value = Date.now();
 };
 
 const onNavChange = async (id: string) => {
@@ -616,6 +645,8 @@ const onNavChange = async (id: string) => {
     active.value.class = '';
     active.value.nav = id;
     config.value.default = config.value.list.find((item) => item.id === id)!;
+
+    infiniteId.value = Date.now();
   } catch (error) {
     console.error(`Failed to change config:`, error);
   } finally {

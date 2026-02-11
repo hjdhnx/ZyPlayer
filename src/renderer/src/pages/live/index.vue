@@ -251,6 +251,12 @@ const getChannel = async (): Promise<number> => {
   return resp.list.length;
 };
 
+const loadMoreChannel = async (): Promise<number> => {
+  const length = await getChannel();
+  if (length !== 0) pagination.value.pageIndex++;
+  return length;
+};
+
 const updateChannelProperty = <K extends keyof IChannel>(id: string, key: K, value: IChannel[K]) => {
   const index = channelList.value.findIndex((item) => item.id === id);
   if (index !== -1) {
@@ -313,15 +319,8 @@ const loadMore = async ($state: ILoadStateHdandler) => {
       return;
     }
 
-    const length = await getChannel();
-
-    if (length === 0) {
-      resetPagination();
-      $state.complete();
-    } else {
-      pagination.value.pageIndex++;
-      $state.loaded();
-    }
+    const length = await loadMoreChannel();
+    length === 0 ? $state.complete() : $state.loaded();
   } catch (error) {
     console.error(`Failed to load more data:`, error);
     $state.error();
@@ -329,8 +328,10 @@ const loadMore = async ($state: ILoadStateHdandler) => {
 };
 
 const handleSearch = async () => {
-  channelList.value = [];
   resetPagination();
+
+  channelList.value = [];
+
   infiniteId.value = Date.now();
 };
 
@@ -435,8 +436,6 @@ const defaultConfig = () => {
   channelList.value = [];
 
   config.value.default = {} as IModels['iptv'];
-
-  infiniteId.value = Date.now();
 };
 
 const reloadConfig = async (eventData: { source: string; data: any }) => {
@@ -445,6 +444,8 @@ const reloadConfig = async (eventData: { source: string; data: any }) => {
 
   defaultConfig();
   await getSetting();
+
+  infiniteId.value = Date.now();
 };
 
 const onNavChange = async (id: string) => {
@@ -455,6 +456,8 @@ const onNavChange = async (id: string) => {
     await putIptvDefault(id);
     config.value.default = config.value.list.find((item) => item.id === id)!;
     emitter.emit(emitterChannel.REFRESH_LIVE_CONFIG, { source: emitterSource.PAGE_SHOW });
+
+    infiniteId.value = Date.now();
   } catch (error) {
     console.error(`Failed to change config:`, error);
   } finally {

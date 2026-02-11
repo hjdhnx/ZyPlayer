@@ -180,7 +180,12 @@ onActivated(() => {
   emitter.on(emitterChannel.REFRESH_MOMENT_CONFIG, reloadConfig);
 });
 
-const getSetting = async () => {
+const resetPagination = () => {
+  pagination.value.pageIndex = 1;
+  pagination.value.total = 0;
+};
+
+const getStar = async (): Promise<number> => {
   const { pageIndex, pageSize } = pagination.value;
 
   const resp = await fetchStarPage({
@@ -198,16 +203,16 @@ const getSetting = async () => {
   return resp.list.length;
 };
 
+const loadMoreStar = async (): Promise<number> => {
+  const length = await getStar();
+  if (length !== 0) pagination.value.pageIndex++;
+  return length;
+};
+
 const loadMore = async ($state: ILoadStateHdandler) => {
   try {
-    const length = await getSetting();
-
-    if (length === 0) {
-      $state.complete();
-    } else {
-      pagination.value.pageIndex++;
-      $state.loaded();
-    }
+    const length = await loadMoreStar();
+    length === 0 ? $state.complete() : $state.loaded();
   } catch (error) {
     console.error(`Failed to load more data:`, error);
     $state.error();
@@ -416,12 +421,18 @@ const handleRemoveItem = async (item: IStar) => {
   pagination.value.total--;
 };
 
+const defaultConfig = () => {
+  resetPagination();
+
+  starList.value = [];
+};
+
 const reloadConfig = async (eventData: { source: string; data: any }) => {
   const { source } = eventData;
   if (source === emitterSource.PAGE_SHOW) return;
 
-  starList.value = [];
-  pagination.value.pageIndex = 1;
+  defaultConfig();
+
   infiniteId.value = Date.now();
 };
 </script>

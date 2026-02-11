@@ -2,6 +2,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const zlib = require('node:zlib');
+const sevenZip = require('node-7z');
+const sevenZipBin = require('7zip-bin-full');
 const { execSync } = require('node:child_process');
 const { downloadWithRedirects } = require('./download');
 
@@ -9,17 +11,40 @@ const { downloadWithRedirects } = require('./download');
 const FFMPEG_RELEASE_BASE_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download';
 const DEFAULT_FFMPEG_VERSION = 'b6.1.1';
 
+const FFMPEG_WIN_ARM_RELEASE_BASE_URL = 'https://github.com/tordona/ffmpeg-win-arm64/releases/download';
+const DEFAULT_FFMPEG_WIN_ARM_VERSION = '7.1.2';
+
 // Mapping of platform+arch to binary package name
 const FFMPEG_PACKAGES = {
   'darwin-arm64': 'ffmpeg-darwin-arm64.gz',
   'darwin-x64': 'ffmpeg-darwin-x64.gz',
-  // 'win32-arm64': '', // No arm64 Windows build available
-  // 'win32-ia32': '', // No ia32 Windows build available
+  'win32-arm64': 'ffmpeg-7.1.2-full-static-win-arm64.7z',
   'win32-x64': 'ffmpeg-win32-x64.gz',
   'linux-arm64': 'ffmpeg-linux-arm64.gz',
   'linux-ia32': 'ffmpeg-linux-ia32.gz',
   'linux-x64': 'ffmpeg-linux-x64.gz',
 };
+
+/**
+ * Extract .gz file
+ */
+async function extractGz(inputPath, outputPath) {
+  const compressed = fs.readFileSync(inputPath);
+  const decompressed = zlib.gunzipSync(compressed);
+  fs.writeFileSync(outputPath, decompressed);
+}
+
+/**
+ * Extract .7z file
+ */
+async function extract7z(inputPath, outputPath) {
+  const sevenZipPath = sevenZipBin.path7z;
+  await new Promise((resolve, reject) => {
+    const stream = sevenZip.extractFull(inputPath, outputPath, { $bin: sevenZipPath });
+    stream.on('end', () => resolve());
+    stream.on('error', reject);
+  });
+}
 
 /**
  * Downloads and extracts the ffmpeg binary for the specified platform and architecture
@@ -28,7 +53,7 @@ const FFMPEG_PACKAGES = {
  * @param {string} version Version of ffmpeg to download
  * @param {boolean} isMusl Whether to use MUSL variant for Linux
  */
-async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VERSION, isMusl = false) {
+async function downloadFFmpegBinary(platform, arch, version, isMusl = false) {
   const platformKey = isMusl ? `${platform}-musl-${arch}` : `${platform}-${arch}`;
   const packageName = FFMPEG_PACKAGES[platformKey];
 
@@ -43,56 +68,64 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
   fs.mkdirSync(binDir, { recursive: true });
 
   // Download URL for the specific binary
-  const downloadUrl = `${FFMPEG_RELEASE_BASE_URL}/${version}/${packageName}`;
-  const tempdir = os.tmpdir();
-  const tempFilename = path.join(tempdir, packageName);
+  let downloadUrl;
+  if (platform === 'win32' && arch === 'arm64') {
+    downloadUrl = `${FFMPEG_WIN_ARM_RELEASE_BASE_URL}/${version}/${packageName}`;
+  } else {
+    downloadUrl = `${FFMPEG_RELEASE_BASE_URL}/${version}/${packageName}`;
+  }
+
+  const tempDir = os.tmpdir();
+  const tempFilename = path.join(tempDir, packageName);
+  console.log(`Will be saved to: ${tempFilename}`);
+
   const isGz = packageName.endsWith('.gz');
+  const is7z = packageName.endsWith('.7z');
 
   try {
     console.log(`Downloading ffmpeg ${version} for ${platformKey}...`);
     console.log(`URL: ${downloadUrl}`);
 
     await downloadWithRedirects(downloadUrl, tempFilename);
-
     console.log(`Extracting ${packageName} to ${binDir}...`);
 
+    const tempExtractDir = path.join(tempDir, `ffmpeg-extract-${Date.now()}`);
+    fs.mkdirSync(tempExtractDir, { recursive: true });
+    const binaryName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+    const outputFilePath = path.join(tempExtractDir, binaryName);
+
     if (isGz) {
-      // Use zlib command to extract gz files
-      const tempExtractDir = path.join(tempdir, `ffmpeg-extract-${Date.now()}`);
-      fs.mkdirSync(tempExtractDir, { recursive: true });
-
-      const binaryName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
-      const compressed = fs.readFileSync(tempFilename);
-      const decompressed = zlib.gunzipSync(compressed);
-      fs.writeFileSync(path.join(tempExtractDir, binaryName), decompressed);
-
-      // Find all files in the extracted directory and move them to binDir
-      const findAndMoveFiles = (dir) => {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            findAndMoveFiles(fullPath);
-          } else {
-            const filename = path.basename(entry.name);
-            const outputPath = path.join(binDir, filename);
-            fs.copyFileSync(fullPath, outputPath);
-            console.log(`Extracted ${entry.name} -> ${outputPath}`);
-            // Make executable on Unix-like systems
-            if (platform !== 'win32') {
-              fs.chmodSync(outputPath, 0o755);
-            }
-          }
-        }
-      };
-
-      findAndMoveFiles(tempExtractDir);
-
-      // Clean up temporary extraction directory
-      fs.rmSync(tempExtractDir, { recursive: true });
+      await extractGz(tempFilename, outputFilePath);
+    } else if (is7z) {
+      await extract7z(tempFilename, tempExtractDir);
     }
 
+    // Find ffmpeg files and copy to binDir
+    const findAndMoveFiles = (dir) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          findAndMoveFiles(fullPath);
+        } else {
+          if (entry.name !== binaryName) continue;
+
+          const outputPath = path.join(binDir, entry.name);
+          fs.copyFileSync(fullPath, outputPath);
+          console.log(`Extracted ${entry.name} -> ${outputPath}`);
+
+          if (platform !== 'win32') {
+            fs.chmodSync(outputPath, 0o755);
+          }
+        }
+      }
+    };
+    findAndMoveFiles(tempExtractDir);
+
+    // Clean up temporary
     fs.unlinkSync(tempFilename);
+    fs.rmSync(tempExtractDir, { recursive: true });
+
     console.log(`Successfully installed ffmpeg ${version} for ${platform}-${arch}`);
     return 0;
   } catch (error) {
@@ -148,12 +181,10 @@ function detectIsMusl() {
  * Main function to install ffmpeg
  */
 async function installFFmpeg() {
-  // Get the latest version if no specific version is provided
-  const version = DEFAULT_FFMPEG_VERSION;
-  console.log(`Using ffmpeg version: ${version}`);
-
   const { platform, arch, isMusl } = detectPlatformAndArch();
 
+  // Get the latest version if no specific version is provided
+  const version = arch === 'arm64' && platform === 'win32' ? DEFAULT_FFMPEG_WIN_ARM_VERSION : DEFAULT_FFMPEG_VERSION;
   console.log(`Installing ffmpeg ${version} for ${platform}-${arch}${isMusl ? ' (MUSL)' : ''}...`);
 
   return await downloadFFmpegBinary(platform, arch, version, isMusl);

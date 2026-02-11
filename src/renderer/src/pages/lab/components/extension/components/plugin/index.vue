@@ -60,6 +60,12 @@
       @submit="handleDialogUpdate"
     />
     <dialog-detail-view v-model:visible="dialogState.visibleDetail" :data="formData" />
+    <dialog-document
+      v-model:visible="dialogState.visibleHelp"
+      :attach="`.${attachContent}`"
+      :title="$t('pages.md.binaryHelp.title')"
+      :content="$t('pages.md.binaryHelp.content')"
+    />
   </div>
 </template>
 <script lang="tsx" setup>
@@ -73,9 +79,11 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onActivated, onMounted, ref } from 'vue';
 
 import { fetchPluginPage } from '@/api/plugin';
+import DialogDocument from '@/components/dialog-docment/index.vue';
 // import { installPlugin, startPlugin, stopPlugin, uninstallPlugin } from '@/api/plugin';
 import SettingTable from '@/components/setting-table/index.vue';
 import { emitterChannel, emitterSource } from '@/config/emitterChannel';
+import { attachContent } from '@/config/global';
 import { t } from '@/locales';
 import emitter from '@/utils/emitter';
 
@@ -95,11 +103,13 @@ const operations = computed(() => [
   { label: t('common.uninstall'), value: 'delete' },
   { label: t('common.store'), value: 'store' },
   { label: t('pages.lab.extension.env.title'), value: 'env' },
+  { label: t('common.help'), value: 'help' },
 ]);
 
 const dialogState = ref({
   visibleForm: false,
   visibleDetail: false,
+  visibleHelp: false,
   formType: 'add',
   currentId: '',
 });
@@ -224,6 +234,14 @@ const handleOpActiveSwitch = async (id: string) => {
   if (item) handleOperation(item.isActive ? 'enable' : 'disable', [id]);
 };
 
+const handleOpEnv = () => {
+  emits('change-nav', 'env');
+};
+
+const handleOpHelp = () => {
+  dialogState.value.visibleHelp = true;
+};
+
 // @ts-expect-error Not all code paths return values。ts-7030
 const handleOperation = async (type: string, payload: any) => {
   const noSelectOps = ['enable', 'disable', 'delete'];
@@ -247,7 +265,8 @@ const handleOperation = async (type: string, payload: any) => {
       dialogState.value.visibleDetail = true;
     },
     store: () => window.electron.ipcRenderer.invoke(IPC_CHANNEL.WINDOW_BROWSER, PLUGIN_STORE_URL),
-    env: () => emits('change-nav', 'env'),
+    env: handleOpEnv,
+    help: handleOpHelp,
   }[type];
 
   await op?.();

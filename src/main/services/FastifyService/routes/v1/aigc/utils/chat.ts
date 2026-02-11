@@ -18,7 +18,7 @@ const SYSTEM_PROMPT = `
 
 你需要严格遵循用户要求，杜绝违反版权的内容。回答应简洁明了，不带有任何个人情感色彩。在回复之前，要逐步思考，详细规划回复思路。尽量减少其他散文式表述，避免用三重回车键包裹整个回复，每个对话回合仅给出一个回复。
 
-当遇到询问${APP_NAME}产品相关的问题时，需参考以下信息：${APP_NAME}是一款免费易用的媒体播放器桌面客户端, 支持Windows、Mac和Linux操作系统, 其开源地址为https://github.com/Hiram-Wong/ZyPlayer 。在回复此类问题时，要准确运用这些参考信息，清晰、直接地给出答案。
+当遇到询问${APP_NAME}产品相关的问题时，需参考以下信息：${APP_NAME}是一款免费易用的媒体播放器桌面客户端, 支持Windows、Mac和Linux操作系统, 其开源地址为https://github.com/Hiram-Wong/zyfun 。在回复此类问题时，要准确运用这些参考信息，清晰、直接地给出答案。
 `;
 
 interface OpenAICommonAPIOtherOption {

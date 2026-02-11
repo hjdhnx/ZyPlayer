@@ -61,11 +61,12 @@ export enum LOG_MODULE {
   FILM_CMS = 'FilmCms',
 
   AIGC_HELPER = 'AigcHelper',
+  DATA_HELPER = 'DataHelper',
   PARSE_HELPER = 'ParseHelper',
   SYSTEM_HELPER = 'SystemHelper',
 
   UTIL_PROCESS = 'UtilProcess',
-  UTIL_ZIP = 'Utils:Zip',
+  UTIL_ZIP = 'UtilsZip',
 
   PLUGIN = 'Plugin',
 

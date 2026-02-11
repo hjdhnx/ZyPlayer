@@ -155,7 +155,7 @@ class T3AppYsV2Adapter {
         vod_pic: this.fixPic(v.vod_pic),
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb || v.vod_content || '').trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }));
 
     const pagecurrent = 1;
@@ -188,7 +188,7 @@ class T3AppYsV2Adapter {
         vod_pic: this.fixPic(v.vod_pic),
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb || v.vod_content || '').trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }));
 
     const pagecurrent = Number(rawPage) || page;
@@ -330,7 +330,7 @@ class T3AppYsV2Adapter {
         vod_pic: this.fixPic(v.vod_pic),
         vod_remarks: v.vod_remarks ?? '',
         vod_blurb: (v.vod_blurb || v.vod_content || '').trim(),
-        vod_tag: v.vod_tag || 'file',
+        vod_tag: ['action', 'file', 'folder'].includes(v.vod_tag || 'file') ? v.vod_tag : 'file',
       }))
       .filter((v) => v.vod_id);
 

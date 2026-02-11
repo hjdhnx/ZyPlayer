@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import type { ISetup } from '@shared/config/tblSetting';
 import { setupObj as tblSetup } from '@shared/config/tblSetting';
+import { THEME } from '@shared/config/theme';
 import { onMounted, ref, watch } from 'vue';
 
 import { fetchSetup } from '@/api/setting';
@@ -37,8 +38,20 @@ watch(
     if (val.theme !== setupConf.value?.theme) storeSetting.changePreferredTheme();
     if (val.lang !== setupConf.value?.lang) storeSetting.changePreferredLang();
     if (val.debug !== setupConf.value?.debug) debugMode(val.debug);
+
+    for (const key in val) {
+      setupConf.value[key] = val[key];
+    }
   },
   { deep: true },
+);
+watch(
+  () => storeSetting.displayTheme,
+  () => {
+    if (storeSetting.theme === THEME.SYSTEM) {
+      storeSetting.changePreferredTheme();
+    }
+  },
 );
 
 onMounted(() => setup());
@@ -49,9 +62,9 @@ const setup = () => {
 
 const syncStore = async () => {
   const resp = await fetchSetup();
-  const { barrage, bossKey, debug, disclaimer, lang, player, theme, timeout } = resp;
-
   setupConf.value = resp;
+
+  const { barrage, bossKey, debug, disclaimer, lang, player, theme, timeout } = resp;
 
   // privacy policy
   active.value.disclaimer = !disclaimer;
@@ -60,8 +73,9 @@ const syncStore = async () => {
   storeSetting.updateConfig({ bossKey, debug, lang, theme, timeout: timeout || 5000 });
   // play store sync config
   storePlayer.updateConfig({ barrage, player });
-};
 
+  if (debug) debugMode(debug);
+};
 const debugMode = (type: boolean) => {
   if (type) {
     startVitals();

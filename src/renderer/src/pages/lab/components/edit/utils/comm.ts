@@ -43,7 +43,13 @@ const utilsJoinPath = async (...paths: string[]): Promise<string> => {
 };
 
 export const openFolder = async (type?: ISiteType): Promise<void> => {
-  const path = await getPath(type);
+  let path = await getPath(type);
+
+  if (!(await window.electron.ipcRenderer.invoke(IPC_CHANNEL.FS_EXIST, path))) {
+    const commonPath = await utilsCommonPath();
+    path = await utilsJoinPath(commonPath, 'file');
+  }
+
   await window.electron.ipcRenderer.invoke(IPC_CHANNEL.OPEN_PATH, path);
 };
 

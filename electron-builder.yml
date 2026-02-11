@@ -1,6 +1,6 @@
 # see config at https://www.electron.build/configuration
 
-appId: com.player.zyfun
+appId: com.github.zyfun
 productName: zyfun
 copyright: Copyright © 2023 zyfun Inc.
 electronLanguages:
@@ -48,7 +48,7 @@ files:
   - '!scripts'
   - '!docs'
   - '!packages'
-  - '!patches/*'
+  - '!patches'
   - '!design/*.sketch'
 
   # Exclusion python
@@ -68,11 +68,20 @@ files:
   - '!**/{example,examples}/**'
   - '!**/*.{spec,test}.{js,jsx,ts,tsx}'
 
+  # Exclusion native build files
+  - '!**/node_modules/**/*.cpp'
+  - '!**/node_modules/node-addon-api/**'
+  - '!**/node_modules/prebuild-install/**'
+  - '!**/*.{h,iobj,ipdb,tlog,recipe,vcxproj,vcxproj.filters,Makefile,*.Makefile}' # filter .node build files
+
   # Exclusion others
+  - '!.swc'
+  - '!.bin'
   - '!**/*.min.*.map'
   - '!**/*.d.ts'
   - '!*.log'
   - '!**/{LICENSE,LICENSE.txt,ThirdPartyNotices.txt,NOTICE.txt,README.md,RELEASE.md,CHANGELOG.md}'
+  - '!node_modules/rollup-plugin-visualizer'
 asar: true
 asarUnpack:
   - resources/**
@@ -80,6 +89,7 @@ win:
   artifactName: ${productName}-${os}-${version}-${arch}-setup.${ext}
   executableName: zyfun
   icon: build/icon.ico
+  # signAndEditExecutable: false
   signtoolOptions:
     sign: scripts/win-sign.js
   target:
@@ -110,7 +120,6 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   icon: build/icon.icns
-  minimumSystemVersion: '20.1.0'
   notarize: false
   target:
     - target: dmg
@@ -137,11 +146,10 @@ rpm:
   # Workaround for electron build issue on rpm package:
   # https://github.com/electron/forge/issues/3594
   fpm: ['--rpm-rpmbuild-define=_build_id_links none']
-npmRebuild: false
 publish:
   provider: github
   owner: 'Hiram-Wong'
-  repo: 'ZyPlayer'
+  repo: 'zyfun'
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
 beforePack: scripts/before-pack.js

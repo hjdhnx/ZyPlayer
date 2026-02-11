@@ -171,10 +171,8 @@ import { isObject, isObjectEmpty, isStrEmpty, isString } from '@shared/modules/v
 import type { ISiftCategoryResult } from '@shared/types/sift';
 import { Pane, Splitpanes } from 'splitpanes';
 import { ClearFormatting1Icon } from 'tdesign-icons-vue-next';
-import type { MessageInstance } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import type { WatchStopHandle } from 'vue';
-import { computed, onActivated, onDeactivated, ref, useTemplateRef, watch } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 import { fetchEditSiftCategory, fetchEditSiftFilter } from '@/api/film';
 import type { IEditorOptions } from '@/components/code-editor';
@@ -282,11 +280,6 @@ const loading = ref({
   allSift: false,
 });
 
-const alert = ref<Record<string, Promise<MessageInstance> | null>>({
-  debug: null,
-});
-const debugWatchStop = ref<WatchStopHandle | null>(null);
-
 watch(
   () => storeSetting.displayTheme,
   (val) => {
@@ -299,38 +292,6 @@ watch(
     };
   },
 );
-
-onActivated(() => activeSetup());
-onDeactivated(() => deactivateDispose());
-
-const activeSetup = () => {
-  debugWatchStop.value = watch(
-    () => storeSetting.debug,
-    (val) => {
-      if (!val) {
-        alert.value.debug && MessagePlugin.close(alert.value.debug);
-        alert.value.debug = null;
-        return;
-      }
-
-      if (!alert.value.debug) {
-        alert.value.debug = MessagePlugin.warning({
-          content: t('common.alert.debugModuleConflict'),
-          duration: 0,
-          closeBtn: true,
-        });
-      }
-    },
-    { immediate: true },
-  );
-};
-const deactivateDispose = () => {
-  debugWatchStop.value?.();
-  debugWatchStop.value = null;
-
-  alert.value.debug && MessagePlugin.close(alert.value.debug);
-  alert.value.debug = null;
-};
 
 const actionGenerateCategory = async () => {
   const { class_parse = '', cate_exclude = '', reurl = '' } = siftFormData.value;

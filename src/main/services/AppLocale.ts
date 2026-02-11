@@ -34,6 +34,7 @@ export class AppLocale {
         escapeValue: false,
       },
       saveMissing: true,
+      showSupportNotice: false,
       missingKeyHandler: (_lngs: readonly string[], _ns: string, key: string) => {
         logger.warn(`Missing key: ${key}`);
       },

@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import process from 'node:process';
 
 import { TDesignResolver } from '@tdesign-vue-next/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
@@ -7,7 +8,6 @@ import { defineConfig } from 'electron-vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { ViteImageOptimizer as viteImageOptimizer } from 'vite-plugin-image-optimizer';
 import viteVueDevTools from 'vite-plugin-vue-devtools';
 import viteSvgLoader from 'vite-svg-loader';
 
@@ -128,7 +128,6 @@ export default defineConfig({
           }),
         ],
       }),
-      viteImageOptimizer(),
       viteSvgLoader(),
       viteVueDevTools(),
       ...visualizerPlugin('renderer'),
@@ -154,7 +153,7 @@ export default defineConfig({
     build: {
       target: 'esnext', // for build
       rollupOptions: {
-        external: ['worker_threads', 'crypto'],
+        external: ['crypto'],
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
         },

@@ -1,7 +1,7 @@
 <template>
   <div class="quick-menu__ai">
     <t-button theme="default" shape="square" class="btn" @click="switchDrawer">
-      <template #icon><wink-icon /></template>
+      <template #icon><robot2-icon /></template>
     </t-button>
 
     <t-drawer
@@ -28,7 +28,7 @@ defineOptions({
   name: 'QuickMenuAi',
 });
 
-import { WinkIcon } from 'tdesign-icons-vue-next';
+import { Robot2Icon } from 'tdesign-icons-vue-next';
 import { ref } from 'vue';
 
 import { attachContent } from '@/config/global';
