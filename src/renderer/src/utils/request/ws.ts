@@ -1,11 +1,10 @@
 // sse配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
+import { ORIGIN, PREFIX } from '@shared/config/env';
 import { VWs } from '@shared/modules/request';
 import { ContentTypeEnum } from '@shared/modules/request/constants';
 import { formatRequestDate, joinTimestamp, setObjToUrlParams } from '@shared/modules/request/utils';
 import type { ICreateWsInsOptions, IWsTransform } from '@shared/modules/request/ws/WsTransform';
 import { isString, merge } from 'es-toolkit';
-
-import { host, prefix } from '@/utils/env';
 
 // 数据处理，方便区分多种处理方式
 const transform: IWsTransform = {
@@ -119,12 +118,12 @@ function createWs(opt?: Partial<ICreateWsInsOptions>) {
         // 配置项，下面的选项都可以在独立的接口请求中覆盖
         requestOptions: {
           // 接口地址
-          apiUrl: host,
+          apiUrl: ORIGIN,
           // 是否自动添加接口前缀
           isJoinPrefix: true,
           // 接口前缀
           // 例如: https://www.baidu.com/api
-          urlPrefix: prefix,
+          urlPrefix: PREFIX,
           // 是否返回原生响应头 比如：需要获取响应头时使用该属性
           isReturnNativeResponse: false,
           // 需要对返回数据进行处理

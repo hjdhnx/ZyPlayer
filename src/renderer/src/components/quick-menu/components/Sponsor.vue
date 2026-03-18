@@ -11,7 +11,7 @@
             <div class="sponsor-arrow"></div>
             <div class="sponsor-qrcode">
               <t-image
-                v-if="isChinaMainland"
+                v-if="isCHS"
                 :src="IMG_QR_ALIWECHAT"
                 lazy
                 shape="round"
@@ -22,7 +22,7 @@
             <div class="sponsor-support">
               <p class="sponsor-support-info">{{ $t('common.support') }}</p>
               <div class="sponsor-support-platform">
-                <template v-if="isChinaMainland">
+                <template v-if="isCHS">
                   <t-image :src="IMG_PLATFORM_ALI" lazy shape="round" :style="{ width: '16px', height: '16px' }" />
                   <t-image :src="IMG_PLATFORM_WECHAT" lazy shape="round" :style="{ width: '16px', height: '16px' }" />
                 </template>
@@ -60,7 +60,7 @@ import { useSettingStore } from '@/store';
 
 const storeSetting = useSettingStore();
 
-const isChinaMainland = computed(() => storeSetting.isChinaMainland);
+const isCHS = computed(() => storeSetting.isCHS);
 </script>
 <style lang="less" scoped>
 .sponsor_main {

@@ -118,7 +118,7 @@ const MultiPlayer = defineComponent({
         mseRef.value.className = 'multi-player__mse';
         mseRef.value.id = 'mse';
 
-        const attrs = Array.from(mseRef.value.attributes);
+        const attrs = [...mseRef.value.attributes];
         for (const attr of attrs) {
           if (attr.name !== 'class' && attr.name !== 'id') {
             try {

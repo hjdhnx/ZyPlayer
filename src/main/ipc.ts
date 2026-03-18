@@ -26,7 +26,7 @@ import type { INotification } from '@shared/config/notification';
 import type { IProxyType } from '@shared/config/setting';
 import { PROXY_TYPE } from '@shared/config/setting';
 import type { IShortcutConfig, IShortcutType } from '@shared/config/shortcut';
-import { WINDOW_NAME } from '@shared/config/windowName';
+import { WINDOW_NAME } from '@shared/config/window';
 import type { ILang } from '@shared/locales';
 import { isExternal, isHttp, isPositiveFiniteNumber } from '@shared/modules/validate';
 import type { ProxyConfig } from 'electron';
@@ -131,7 +131,7 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
       const trimmed = value.trim();
       const first = trimmed[0];
-      const last = trimmed[trimmed.length - 1];
+      const last = trimmed.at(-1);
 
       if (first === `'` && last === `'`) {
         return `"${trimmed.slice(1, -1)}"`;
@@ -174,6 +174,10 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
     menuService.updateMenu(true);
     trayService.updateTray(true);
+  });
+
+  ipcMain.handle(IPC_CHANNEL.CHANGE_ZOOM, (_, zoom: number) => {
+    windowService.setZoomWindows(zoom);
   });
 
   // file

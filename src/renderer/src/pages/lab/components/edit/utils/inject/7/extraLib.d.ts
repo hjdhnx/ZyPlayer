@@ -7,6 +7,7 @@ declare const RSA: {
    * @param data 待解密的字符串数据
    * @param key 解密所用的密钥
    * @param option 解密选项，包含分段解密时的块大小 默认分段长度为117
+   * @param option.chunkSize 分段解密时的块大小，默认为117
    * @returns 解密后的字符串数据，若 JSEncrypt 未定义则返回 false
    */
   decode: (data: string, key: string, option?: { chunkSize?: number }) => string | false;
@@ -15,6 +16,7 @@ declare const RSA: {
    * @param data 待加密的字符串数据
    * @param key 加密所用的密钥
    * @param option 加密选项，包含分段加密时的块大小  默认分段长度为117
+   * @param option.chunkSize 分段解密时的块大小，默认为117
    * @returns 加密后的字符串数据，若 JSEncrypt 未定义则返回 false
    */
   encode: (data: string, key: string, option?: { chunkSize?: number }) => string | false;

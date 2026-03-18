@@ -10,8 +10,8 @@ export const getInitchema = {
   summary: 'Get cms init',
   description: 'Cms init.',
   querystring: Type.Object({
-    uuid: Type.String(),
-    force: Type.Optional(Type.Boolean()),
+    uuid: Type.String({ description: 'cms uuid' }),
+    force: Type.Optional(Type.Boolean({ description: 'refresh cache' })),
   }),
   response: {
     200: createHttpSuccessResponseSchema(Type.Boolean(), { description: 'Successful Operation' }),
@@ -27,7 +27,7 @@ export const getHomeSchema = {
   summary: 'Get cms home',
   description: 'Cms home.',
   querystring: Type.Object({
-    uuid: Type.String(),
+    uuid: Type.String({ description: 'cms uuid' }),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -72,7 +72,7 @@ export const getHomeVodSchema = {
   summary: 'Get cms homeVod',
   description: 'Cms homeVod.',
   querystring: Type.Object({
-    uuid: Type.String(),
+    uuid: Type.String({ description: 'cms uuid' }),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -107,10 +107,10 @@ export const getCategorySchema = {
   summary: 'Get cms category',
   description: 'Cms category.',
   querystring: Type.Object({
-    uuid: Type.String(),
-    tid: Type.Union([Type.String(), Type.Integer({ format: 'int32' })]),
-    page: Type.Optional(Type.Integer({ format: 'int32' })),
-    extend: Type.Optional(Type.String()),
+    uuid: Type.String({ description: 'cms uuid' }),
+    tid: Type.Union([Type.String(), Type.Integer({ format: 'int32' })], { description: 'category id' }),
+    page: Type.Optional(Type.Integer({ format: 'int32', description: 'page' })),
+    extend: Type.Optional(Type.String({ description: 'extend' })),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -143,8 +143,8 @@ export const getDetailSchema = {
   summary: 'Get cms detail',
   description: 'Cms detail.',
   querystring: Type.Object({
-    uuid: Type.String(),
-    ids: Type.String(),
+    uuid: Type.String({ description: 'cms uuid' }),
+    ids: Type.String({ description: 'detail id' }),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -191,9 +191,9 @@ export const getSearchSchema = {
   summary: 'Get cms search',
   description: 'Cms search.',
   querystring: Type.Object({
-    uuid: Type.String(),
-    wd: Type.String(),
-    page: Type.Optional(Type.Integer({ format: 'int32' })),
+    uuid: Type.String({ description: 'cms uuid' }),
+    wd: Type.String({ description: 'search word' }),
+    page: Type.Optional(Type.Integer({ format: 'int32', description: 'page' })),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -226,9 +226,9 @@ export const getPlaySchema = {
   summary: 'Get cms play',
   description: 'Cms play.',
   querystring: Type.Object({
-    uuid: Type.String(),
-    play: Type.String(),
-    flag: Type.Optional(Type.String()),
+    uuid: Type.String({ description: 'cms uuid' }),
+    play: Type.String({ description: 'play episode' }),
+    flag: Type.Optional(Type.String({ description: 'play line' })),
   }),
   response: {
     200: createHttpSuccessResponseSchema(
@@ -249,15 +249,39 @@ export const getPlaySchema = {
   },
 };
 
+export const getActionSchema = {
+  tags: [API_PREFIX],
+  summary: 'Get cms action',
+  description: 'Cms action.',
+  querystring: Type.Object({
+    uuid: Type.String({ format: 'uuid', description: 'cms uuid' }),
+    action: Type.String({ description: 'action key' }),
+    value: Type.Optional(
+      Type.Union([Type.String(), Type.Record(Type.String(), Type.Any())], { description: 'action value' }),
+    ),
+    timeout: Type.Optional(Type.Integer({ format: 'int32', description: 'action timeout, unit is second' })),
+  }),
+  response: {
+    200: createHttpSuccessResponseSchema(
+      Type.Optional(Type.Union([Type.String(), Type.Record(Type.String(), Type.Any())])),
+      { description: 'Successful Operation' },
+    ),
+    default: {
+      description: 'Unexpected Error',
+      $ref: Schema.ApiReponseError,
+    },
+  },
+};
+
 export const getProxySchema = {
   tags: [API_PREFIX],
   summary: 'Get cms proxy',
   description: 'Cms proxy.',
   querystring: Type.Object(
     {
-      uuid: Type.String({ format: 'uuid' }),
-      do: Type.String({ enum: ['js', 'py'] }),
-      url: Type.String({ format: 'uri' }),
+      uuid: Type.String({ format: 'uuid', description: 'cms uuid' }),
+      do: Type.String({ description: 'proxy type' }),
+      url: Type.String({ format: 'uri', description: 'proxy url' }),
     },
     { additionalProperties: true },
   ),
@@ -278,8 +302,8 @@ export const getCheckSchema = {
   summary: 'Check cms validity',
   description: 'Check cms validity.',
   querystring: Type.Object({
-    uuid: Type.String({ format: 'uuid' }),
-    type: Type.String({ enum: ['simple', 'complete'], default: 'check type' }),
+    uuid: Type.String({ format: 'uuid', description: 'cms uuid' }),
+    type: Type.String({ enum: ['search', 'simple', 'complete'], description: 'check type' }),
   }),
   response: {
     200: createHttpSuccessResponseSchema(Type.Boolean(), { description: 'Successful Operation' }),

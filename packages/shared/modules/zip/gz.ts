@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 
-import { isStrEmpty, isString } from '@shared/modules/validate';
+import { isStrEmpty, isString } from '../validate';
 
 /**
  * Compressing a directory into a gz file

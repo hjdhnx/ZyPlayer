@@ -152,7 +152,7 @@
 <script setup lang="tsx">
 import { APP_NAME } from '@shared/config/appinfo';
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
-import { WINDOW_NAME } from '@shared/config/windowName';
+import { WINDOW_NAME } from '@shared/config/window';
 import { generateStrUUID } from '@shared/modules/crypto';
 import { isExternal } from '@shared/modules/validate';
 import {

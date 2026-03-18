@@ -1,16 +1,6 @@
-import {
-  isBoolean,
-  isDate,
-  isFunction,
-  isJson,
-  isMap,
-  isNil,
-  isNumber,
-  isSet,
-  isString,
-  isSymbol,
-} from '@shared/modules/validate';
 import JSON5 from 'json5';
+
+import { isBoolean, isDate, isFunction, isJson, isMap, isNil, isNumber, isSet, isString, isSymbol } from './validate';
 
 export const toString = (value: unknown): string => {
   if (isNil(value)) {
@@ -39,7 +29,7 @@ export const toString = (value: unknown): string => {
     try {
       if (isDate(value)) return value.toISOString();
       if (isMap(value)) return JSON5.stringify(Object.fromEntries(value));
-      if (isSet(value)) return JSON5.stringify(Array.from(value));
+      if (isSet(value)) return JSON5.stringify([...value]);
       if (isJson(value)) return JSON5.stringify(value);
       return JSON5.stringify(value);
     } catch {

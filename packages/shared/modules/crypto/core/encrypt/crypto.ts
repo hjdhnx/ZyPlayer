@@ -260,7 +260,7 @@ export const _aes = {
     const plaintext = parse[inputEncode](src);
 
     if (![16, 24, 32].includes(k.sigBytes)) throw new Error('Key must be 128, 192 or 256 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 16) throw new Error('IV must be 128 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 16) throw new Error('IV must be 128 bytes');
 
     if (
       plaintext.sigBytes % 64 !== 0 &&
@@ -327,7 +327,7 @@ export const _aes = {
     const v = mode.toLowerCase() !== 'ecb' ? parse[ivEncode](iv!) : undefined;
 
     if (![16, 24, 32].includes(k.sigBytes)) throw new Error('Key must be 128, 192 or 256 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 16) throw new Error('IV must be 128 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 16) throw new Error('IV must be 128 bytes');
 
     const ciphertext = parse[inputEncode](src);
     const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
@@ -394,7 +394,7 @@ export const des = {
     const plaintext = parse[inputEncode](src);
 
     if (k.sigBytes !== 8) throw new Error('Key must be 64 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const encrypted = CryptoJS.DES.encrypt(plaintext, k, {
       iv: v,
@@ -452,7 +452,7 @@ export const des = {
     const v = mode.toLowerCase() !== 'ecb' ? parse[ivEncode](iv!) : undefined;
 
     if (k.sigBytes !== 8) throw new Error('Key must be 64 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const ciphertext = parse[inputEncode](src);
     const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
@@ -519,7 +519,7 @@ export const tripleDes = {
     const plaintext = parse[inputEncode](src);
 
     if (k.sigBytes !== 24) throw new Error('Key must be 192 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const encrypted = CryptoJS.TripleDES.encrypt(plaintext, k, {
       iv: v,
@@ -577,7 +577,7 @@ export const tripleDes = {
     const v = mode.toLowerCase() !== 'ecb' ? parse[ivEncode](iv!) : undefined;
 
     if (k.sigBytes !== 24) throw new Error('Key must be 256 bytes');
-    if (mode !== 'ecb' && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (mode !== 'ecb' && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const ciphertext = parse[inputEncode](src);
     const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
@@ -636,7 +636,7 @@ export const rabbit = {
     const v = iv ? parse[ivEncode](iv) : undefined;
 
     if (k.sigBytes !== 16) throw new Error('Key must be 128 bytes');
-    if (iv && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (iv && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const plaintext = parse[inputEncode](src);
     const encrypted = CryptoJS.Rabbit.encrypt(plaintext, k, {
@@ -685,7 +685,7 @@ export const rabbit = {
     const v = iv ? parse[ivEncode](iv) : undefined;
 
     if (k.sigBytes !== 16) throw new Error('Key must be 128 bytes');
-    if (iv && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (iv && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const ciphertext = parse[inputEncode](src);
     const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
@@ -740,7 +740,7 @@ export const rabbitLegacy = {
     const v = iv ? parse[ivEncode](iv) : undefined;
 
     if (k.sigBytes !== 16) throw new Error('Key must be 128 bytes');
-    if (iv && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (iv && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const plaintext = parse[inputEncode](src);
     const encrypted = CryptoJS.RabbitLegacy.encrypt(plaintext, k);
@@ -786,7 +786,7 @@ export const rabbitLegacy = {
     const v = iv ? parse[ivEncode](iv) : undefined;
 
     if (k.sigBytes !== 16) throw new Error('Key must be 128 bytes');
-    if (iv && v.sigBytes !== 8) throw new Error('IV must be 64 bytes');
+    if (iv && v!.sigBytes !== 8) throw new Error('IV must be 64 bytes');
 
     const ciphertext = parse[inputEncode](src);
     const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });

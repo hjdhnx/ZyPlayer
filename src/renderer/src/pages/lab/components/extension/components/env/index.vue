@@ -46,7 +46,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
 import { getBinaryList } from '@/api/system';
-import DialogDocument from '@/components/dialog-docment/index.vue';
+import DialogDocument from '@/components/dialog-document/index.vue';
 import GroupBtn from '@/components/group-btn/index.vue';
 import { attachContent } from '@/config/global';
 import { t } from '@/locales';

@@ -13,10 +13,8 @@
         v-model="searchValue"
         :placeholder="$t('component.search.placeholder.input')"
         class="search-input"
-        clearable
         @enter="handleSearch"
         @click="handleInputFocus"
-        @clear.stop="handleSearch('')"
       >
         <template #label>
           <t-select
@@ -31,8 +29,16 @@
             <t-option key="all" :label="$t('pages.setting.base.site.searchMap.all')" value="all" />
           </t-select>
         </template>
-        <template #suffixIcon>
-          <search-icon />
+        <template #suffix>
+          <template v-if="searchValue">
+            <t-button shape="square" size="small" class="suffix-btn" @click.stop="handleSearch('')">
+              <close-circle-filled-icon />
+            </t-button>
+            <t-divider layout="vertical" />
+          </template>
+          <t-button shape="square" size="small" class="suffix-btn" @click.stop="handleSearch(searchValue)">
+            <template #icon><search-icon /></template>
+          </t-button>
         </template>
       </t-input>
 
@@ -101,7 +107,7 @@ defineOptions({
 });
 
 import { toSubtract, toYMD } from '@shared/modules/date';
-import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { CloseCircleFilledIcon, DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PopupVisibleChangeContext } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -122,7 +128,7 @@ const POPUP_CONTENT_ROUTES = Object.keys(RELATE_MAP).filter((name) => !['Live'].
 const MAX_HISTORY_SIZE = 10;
 const MAX_HOT_ITEMS = 10;
 const MAX_RETRY_COUNT = 3;
-const SKELETON_CONFIG = [...Array.from({ length: 4 })].map(() => ({
+const SKELETON_CONFIG = Array.from(Array.from({ length: 4 }), () => ({
   type: 'text',
   width: '100%',
   height: '22px',
@@ -312,7 +318,7 @@ const handlePopupVisible = (_visible: boolean, context: PopupVisibleChangeContex
   }
 };
 
-const reloadConfig = async (eventData: { source: string; data: any }) => {
+const reloadConfig = async ({ data: eventData }) => {
   const { source } = eventData;
   if (source === emitterSource.LAYOUT_HEADER_SEARCH) return;
 
@@ -325,11 +331,11 @@ const reloadConfig = async (eventData: { source: string; data: any }) => {
   await getFilmConf();
 };
 
-const reloadKwConfig = async (eventData: { source: string; data: any }) => {
-  const { source, data } = eventData;
+const reloadKwConfig = async ({ data: eventData }) => {
+  const { source, data: kw } = eventData;
   if (source === emitterSource.LAYOUT_HEADER_SEARCH) return;
 
-  searchValue.value = data;
+  searchValue.value = kw;
 };
 </script>
 <style lang="less" scoped>
@@ -343,6 +349,10 @@ const reloadKwConfig = async (eventData: { source: string; data: any }) => {
       background-color: transparent;
       border-width: 0;
       box-shadow: none;
+
+      .suffix-btn {
+        width: var(--td-comp-size-xxxs);
+      }
     }
   }
 }

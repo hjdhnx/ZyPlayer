@@ -37,7 +37,7 @@ const playNextPlugin = {
 
     this.handle = () => {
       if (!player.loaded) return;
-      emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT);
+      emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, {});
     };
 
     this.el.addEventListener('click', this.handle);

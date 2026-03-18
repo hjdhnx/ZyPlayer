@@ -245,7 +245,7 @@ class DPlayerAdapter {
         })(),
       );
       const handlePlayNext = () => {
-        emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT);
+        emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, {});
       };
       const playNextButton = document.querySelector('.dplayer-playNext-icon');
       if (playNextButton) playNextButton.addEventListener('click', handlePlayNext);

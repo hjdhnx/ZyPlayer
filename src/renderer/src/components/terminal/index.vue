@@ -150,10 +150,22 @@ const colorText = (text: string, color: string) => {
 const write = (val: unknown, level: ITerminalLog = LEVEL.VERBOSE, ln: boolean = true, prefix?: string) => {
   let content = toString(val);
   if (isJsonStr(content)) content = JSON.stringify(JSON5.parse(content), null, 2);
-  const text = colorText(colorText(content, LEVEL_COLOR_MAP[level]), 'BOLD');
+
+  let text = content;
+  let custom = prefix;
+  if (prefix) {
+    const main = colorText(colorText(prefix, LEVEL_COLOR_MAP[level]), 'BOLD');
+    const symbol = colorText('>', 'BOLD');
+    custom = `${main} ${symbol} `;
+  } else {
+    const main = colorText(colorText(content, LEVEL_COLOR_MAP[level]), 'BOLD');
+    text = main;
+  }
+
+  text = colorText(text, 'BOLD');
 
   if (term.value) {
-    if (prefix) term.value.write(prefix);
+    if (prefix) term.value.write(custom!);
     ln ? term.value.writeln(text) : term.value.write(text);
 
     if (!isSelecting.value) term.value.scrollToBottom();

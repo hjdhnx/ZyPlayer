@@ -6,7 +6,7 @@ import { hash } from '@shared/modules/crypto';
 import LruCache from '@shared/modules/lrucache';
 import singleton from '@shared/modules/singleton';
 import { isNil, isPositiveFiniteNumber } from '@shared/modules/validate';
-import type { ICmsAdapter } from '@shared/types/cms';
+import type { ICmsAdapter, ICmsAdapterConstructor } from '@shared/types/cms';
 
 import {
   T0Adapter,
@@ -23,6 +23,8 @@ import {
   T4DrpysAdapter,
 } from '../adapter';
 
+const logger = loggerService.withContext(LOG_MODULE.FILM_CMS);
+
 const CMS_ADAPTER_MAP = {
   [SITE_TYPE.T0_XML]: T0Adapter,
   [SITE_TYPE.T1_JSON]: T1Adapter,
@@ -38,10 +40,42 @@ const CMS_ADAPTER_MAP = {
   [SITE_TYPE.T3_CATOPEN]: T3CatopenAdapter,
 };
 
-const CACHE_LIMIT = 10;
+class WorkLruCache<K = string, V = ICmsAdapter> extends LruCache<K, V> {
+  put(key: K, value: V): V {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.capacity) {
+      const firstKey = this.cache.keys().next().value;
 
-const logger = loggerService.withContext(LOG_MODULE.FILM_CMS);
-const lruCache = new LruCache<string, ICmsAdapter>(CACHE_LIMIT);
+      const pool = this.cache.get(firstKey!) as ICmsAdapter;
+      pool?.destroy?.();
+
+      this.cache.delete(this.cache.keys().next().value!);
+    }
+    this.cache.set(key, value);
+    return value;
+  }
+
+  delete(key: K): boolean {
+    if (!this.cache.has(key)) return false;
+
+    const pool = this.cache.get(key!) as ICmsAdapter;
+    pool?.destroy?.();
+
+    super.delete(key);
+    return true;
+  }
+
+  clear(): void {
+    const keys = [...this.cache.keys()];
+    for (const key of keys) {
+      this.delete(key);
+    }
+  }
+}
+
+const CACHE_LIMIT = 10;
+const lruCache = new WorkLruCache<string, ICmsAdapter>(CACHE_LIMIT);
 
 export const prepare = async (uuid: string, force: boolean = false): Promise<ICmsAdapter> => {
   if (!uuid) {
@@ -52,14 +86,14 @@ export const prepare = async (uuid: string, force: boolean = false): Promise<ICm
   const source = {
     ...dbResSource,
     categories: dbResSource.categories
-      ? Array.from(
-          new Set(
+      ? [
+          ...new Set(
             dbResSource.categories
               .split(/[,，]/)
               .map((c) => c.trim())
               .filter(Boolean),
           ),
-        )
+        ]
       : [],
   };
 
@@ -91,19 +125,17 @@ export const prepare = async (uuid: string, force: boolean = false): Promise<ICm
       logger.error(error as Error);
 
       lruCache.delete(idHash);
-      throw new Error('Cms adapter init failed', { cause: error as Error });
+      throw new Error(`Cms adapter init failed, cause: ${(error as Error).message}`);
     }
   }
 };
 
 export const terminate = async () => {
-  const modules = Object.values(CMS_ADAPTER_MAP) as Array<any>;
+  const modules = Object.values(CMS_ADAPTER_MAP) as Array<ICmsAdapterConstructor>;
   for (const module of modules) {
     const SingleAdapter = singleton(module);
     if (SingleAdapter?.terminate) await SingleAdapter.terminate();
   }
-  for (const [key, adapter] of lruCache.entries()) {
-    await adapter?.terminate?.();
-    lruCache.delete(key);
-  }
+
+  lruCache.clear();
 };

@@ -17,6 +17,7 @@ import { computed, defineAsyncComponent, ref, shallowRef } from 'vue';
 import CommonNav from '@/components/common-nav/index.vue';
 
 const componentMap = {
+  action: defineAsyncComponent(() => import('./components/action/index.vue')),
   player: defineAsyncComponent(() => import('./components/player/index.vue')),
   editor: defineAsyncComponent(() => import('./components/editor/index.vue')),
   webview: defineAsyncComponent(() => import('./components/webview/index.vue')),
@@ -24,6 +25,7 @@ const componentMap = {
 };
 
 const componentNav = computed(() => [
+  { id: 'action', name: '动作面板' },
   { id: 'player', name: '播放器' },
   { id: 'editor', name: '编辑器' },
   { id: 'webview', name: '网页视图' },
@@ -31,7 +33,7 @@ const componentNav = computed(() => [
 ]);
 
 const active = ref({
-  nav: 'player',
+  nav: 'action',
 });
 
 const currentComponent = shallowRef(componentMap[Object.keys(componentMap)[0]]);

@@ -187,16 +187,11 @@ export const html = {
     const { src, entities = 'named', encodeEverything = true, inputEncode = 'utf8' } = options;
     if (src === '') return '';
     const plaintext = wordStringify.utf8(wordParse[inputEncode](src));
-    const encrypted = he.encode(
-      plaintext,
-      Object.assign(
-        {
-          encodeEverything,
-        },
-        entities === 'numeric' ? { decimal: true } : {},
-        ['named', 'hex'].includes(entities) ? { useNamedReferences: entities === 'named' } : {},
-      ),
-    );
+    const encrypted = he.encode(plaintext, {
+      encodeEverything,
+      ...(entities === 'numeric' ? { decimal: true } : {}),
+      ...(['named', 'hex'].includes(entities) ? { useNamedReferences: entities === 'named' } : {}),
+    });
 
     return encrypted;
   },
@@ -206,7 +201,7 @@ export const html = {
    * https://rivers.chaitin.cn/toolkit/cyberChef/HTMLDecode
    *
    * @param {HtmlDecodeOptions} options 解码参数
-   * @returns {string} - 解码参数
+   * @returns {string} - 解码结果
    *
    * @example
    * html.decode({ src: '1 &lt; 2 &amp; 3 &gt; 4' }) // => 1 < 2 & 3 > 4

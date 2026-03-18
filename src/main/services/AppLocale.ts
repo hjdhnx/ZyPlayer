@@ -91,7 +91,7 @@ export class AppLocale {
     return lang;
   }
 
-  public isChinaMainland(): boolean {
+  public isCHS(): boolean {
     const lang = this.defaultLang();
     return lang === 'zh-CN';
   }

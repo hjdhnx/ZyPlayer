@@ -3,7 +3,7 @@ import workerpool from 'workerpool';
 
 import drpy from './drpy2.min';
 
-const { category, detail, home, homeVod, init, play, proxy, search } = drpy;
+const { action, category, detail, home, homeVod, init, play, proxy, search } = drpy;
 
 ['log', 'info', 'warn', 'error', 'debug'].forEach((method) => {
   const level = method === 'log' ? 'verbose' : method;
@@ -63,6 +63,15 @@ const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> 
     return res;
   },
 
+  async action(options) {
+    const { action: method, value, timeout } = options!;
+    if (timeout && timeout > 0) globalThis.variable = { timeout };
+    else delete globalThis.variable?.timeout;
+    const resp = action(method, value);
+    const res = isJsonStr(resp) ? JSON.parse(resp) : resp;
+    return res;
+  },
+
   async proxy(options) {
     const resp = proxy(options);
     const res = isJsonStr(resp) ? JSON.parse(resp) : resp;
@@ -71,9 +80,14 @@ const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> 
 };
 
 const main = async (type: string, options?: Record<string, any>) => {
-  const handler = handlers[type];
-  if (isNil(handler)) throw new Error(`Method not found for type: ${type}`);
-  return await handler(options);
+  try {
+    const handler = handlers[type];
+    if (isNil(handler)) throw new Error(`Method not found for type: ${type}`);
+    return await handler(options);
+  } catch (error) {
+    console.error((error as Error).message);
+    throw error;
+  }
 };
 
 workerpool.worker({ main });

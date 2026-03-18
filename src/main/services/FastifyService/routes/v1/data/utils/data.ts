@@ -4,6 +4,7 @@ import { pathExist, readFile } from '@main/utils/file';
 import { request } from '@main/utils/request';
 import type { IDataImportType, IDataRemoteType } from '@shared/config/data';
 import { DATA_COMPLETE_TYPE, DATA_IMPORT_TYPE, DATA_SIMPLE_TYPE } from '@shared/config/data';
+import { PROXY_API } from '@shared/config/env';
 import { LOG_MODULE } from '@shared/config/logger';
 import type { ISettingKey } from '@shared/config/tblSetting';
 import { settingKeys, settingList as tblSetting } from '@shared/config/tblSetting';
@@ -147,62 +148,131 @@ const tvboxToStandard = (config: Tvbox, baseUrl: string, type: string): Partial<
   }
 
   if (Object.hasOwn(config, 'lives') && isArray(config.lives) && !isArrayEmpty(config.lives)) {
-    const isRedirectLives = (config.lives as TvboxLiveOldItem[]).filter((item) => item.group === 'redirect').length;
+    // [
+    //   {
+    //     name: 'yingshi',
+    //     url: 'http://xxx.xx',
+    //     type: 0,
+    //     epg: 'https://epg.112114.xyz/?ch={name}&date={date}',
+    //     logo: 'https://epg.112114.xyz/logo/{name}.png',
+    //   },
+    //   {
+    //     group: 'redirect',
+    //     channels: [{ name: 'live', urls: ['proxy://do=live&type=txt&ext=base64'] }],
+    //   },
+    //   {
+    //     group: 'default',
+    //     channels: [{ name: 'CCTV-1', urls: ['http://xxx.xxx/0001_1.m3u8', 'http://xxx.xxx/index.m3u8'] }],
+    //   },
+    // ];
+
     const iptv: IDbStore['iptv'] = [];
+    const channel: Array<{ name: string; api: string; group: string }> = [];
 
-    if (isRedirectLives) {
-      for (const live of config.lives as TvboxLiveOldItem[]) {
-        for (const channel of live.channels) {
-          let url = channel.urls[0]?.split('&ext=')[1];
-          if (isBase64(url)) url = base64.decode({ src: url });
-          if (isStrEmpty(url)) continue;
+    const isNewLive = (value: TvboxLiveNewItem): value is TvboxLiveNewItem => value.type === 0 && isHttp(value.url);
+    const isOldLive = (value: TvboxLiveOldItem): value is TvboxLiveOldItem =>
+      isArray(value.channels) && !isArrayEmpty(value.channels);
 
-          const uuid = randomUUID();
-          iptv.push({
-            id: uuid,
-            key: uuid,
-            name: channel.name,
-            type: 1,
-            api: url,
-            epg: '',
-            logo: '',
-            headers: {},
-            isActive: true,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-        }
+    const unwrapProxyUrl = (raw: string) => {
+      if (!raw.startsWith(PROXY_API)) return raw;
+      try {
+        const parsed = new URL(raw);
+        return parsed.searchParams.get('url') || '';
+      } catch {
+        return '';
       }
-    } else {
-      for (const live of config.lives as TvboxLiveNewItem[]) {
-        if (live.type !== 0 || !isHttp(live.url)) continue;
+    };
 
-        let url = live.url;
-        if (url.startsWith('http://127.0.0.1:9978/proxy')) {
-          try {
-            const parsed = new URL(url);
-            url = parsed.searchParams.get('url') || '';
-          } catch {
-            url = '';
-          }
-        }
-        if (!url) continue;
+    for (const live of config.lives) {
+      if (isNewLive(live as TvboxLiveNewItem)) {
+        const { name, url: urlRaw, epg, logo, ua } = live as TvboxLiveNewItem;
+        const url = unwrapProxyUrl(urlRaw);
+        if (!isHttp(url)) continue;
 
         const uuid = randomUUID();
         iptv.push({
           id: uuid,
           key: uuid,
-          name: live.name,
+          name,
           type: 1,
           api: url,
-          epg: live.epg || '',
-          logo: live.logo || '',
-          headers: live.ua ? { 'User-Agent': live.ua } : {},
+          epg: epg ?? '',
+          logo: logo ?? '',
+          headers: ua ? { 'User-Agent': ua } : {},
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
+      } else if (isOldLive(live as TvboxLiveOldItem)) {
+        const { group, channels } = live as TvboxLiveOldItem;
+
+        for (const chal of channels) {
+          const { name, urls } = chal;
+
+          if (group === 'redirect') {
+            const links = urls
+              .map((url) => {
+                const link = url.split('&ext=')?.[1];
+                if (isNil(link)) return null;
+                return isBase64(link) ? base64.decode({ src: link }) : null;
+              })
+              .filter(Boolean) as string[];
+
+            links.forEach((url) => {
+              const uuidSub = randomUUID();
+
+              iptv.push({
+                id: uuidSub,
+                key: uuidSub,
+                name,
+                type: 1,
+                api: url,
+                epg: '',
+                logo: '',
+                headers: {},
+                isActive: true,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              });
+            });
+          } else {
+            urls
+              .filter((url) => isHttp(url))
+              .forEach((item) => {
+                channel.push({
+                  name,
+                  api: item,
+                  group: group ?? '',
+                });
+              });
+          }
+        }
       }
+    }
+
+    if (channel.length) {
+      const m3uArgs = [
+        '#EXTM3U',
+        ...channel.map(
+          (item) => `#EXTINF:-1 tvg-name="${item.name}" group-title="${item.group}",${item.name}\n${item.api}`,
+        ),
+      ];
+      const m3uContent = m3uArgs.join('\n');
+      const uuid = randomUUID();
+
+      iptv.push({
+        id: uuid,
+        key: uuid,
+        name: 'Auto Generated M3U',
+        type: 3,
+        api: m3uContent,
+        epg: '',
+        logo: '',
+        headers: {},
+        isActive: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
     }
 
     data.iptv = iptv;

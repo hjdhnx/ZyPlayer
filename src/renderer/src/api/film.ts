@@ -120,6 +120,15 @@ export function fetchCmsPlay(doc) {
   });
 }
 
+export function fetchCmsAction(doc) {
+  return request.request({
+    url: '/v1/film/cms/action',
+    method: 'get',
+    params: doc,
+    ...(doc.timeout ? { timeout: doc.timeout } : {}),
+  });
+}
+
 export function fetchCmsProxy(doc) {
   return request.request({
     url: '/v1/film/cms/proxy',

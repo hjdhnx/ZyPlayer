@@ -6,44 +6,32 @@ import { APP_PUBLIC_PATH } from '@main/utils/path';
 import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { isJson } from '@shared/modules/validate';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import workerpool from 'workerpool';
 import * as zmq from 'zeromq';
 
 const logger = loggerService.withContext(SITE_LOGGER_MAP[SITE_TYPE.T3_PY]);
 
+zmq.context.blocky = false;
+
 const loggerModule = async (port: number) => {
-  try {
-    const workerpool = await import('workerpool');
-    const zmq = await import('zeromq');
+  const workerpool = await import('workerpool');
+  const zmq = await import('zeromq');
 
-    const sock = new zmq.Subscriber();
-    sock.connect(`tcp://127.0.0.1:${port}`);
-    sock.subscribe('');
+  zmq.context.blocky = false;
 
-    for await (const [msgRaw] of sock) {
-      const msg = JSON.parse(msgRaw as unknown as string);
+  const sock = new zmq.Subscriber();
+  sock.linger = 0;
+  sock.connect(`tcp://127.0.0.1:${port}`);
+  sock.subscribe('');
+
+  for await (const [msgRaw] of sock) {
+    try {
+      const msg = JSON.parse(msgRaw.toString());
       workerpool.workerEmit({ type: 'log', level: 'verbose', msg });
+    } catch {
+      workerpool.workerEmit({ type: 'log', level: 'error', msg: 'Failed to parse log message' });
     }
-  } catch (error) {
-    workerpool.workerEmit({ type: 'log', level: 'error', msg: (error as Error).message });
   }
 };
 
@@ -73,7 +61,7 @@ class ConnectService extends PythonService {
       const pool = workerpool.pool({
         maxWorkers: 1,
         workerType: 'process',
-        workerTerminateTimeout: 5000,
+        forkOpts: { silent: true },
       });
 
       await pool.exec(loggerModule, [this.logPort], {
@@ -101,11 +89,12 @@ class ConnectService extends PythonService {
     }
   }
 
-  private connectApi(): void {
+  private async connectApi(): Promise<void> {
     if (this.socket) return;
 
     try {
       const ctrlSocket = new zmq.Request();
+      ctrlSocket.linger = 0;
       ctrlSocket.connect(`tcp://127.0.0.1:${this.ctrlPort}`);
       this.socket = ctrlSocket;
     } catch (error) {
@@ -116,16 +105,14 @@ class ConnectService extends PythonService {
 
   private async connect(): Promise<void> {
     this.connectLogger();
-    this.connectApi();
+    await this.connectApi();
   }
 
   public async prepare(): Promise<void> {
     this.checkBinary();
     await this.installDep();
 
-    const args = [this.uvBinaryPath, 'run', 'main.py', '--ctrl-port', String(this.ctrlPort)];
-
-    const pids = await this.matchProcess(args.join(' '));
+    const pids = await this.matchPort(this.ctrlPort);
 
     if (pids.length) {
       this.pids = pids;
@@ -134,13 +121,19 @@ class ConnectService extends PythonService {
     }
 
     try {
-      this.runSpawn(['main.py', '--ctrl-port', String(this.ctrlPort)]);
-
-      const pids = await this.matchProcess(args.join(' '));
-      if (pids.length) {
-        this.pids = pids;
-        await this.connect();
-      }
+      await new Promise((resolve, reject) =>
+        this.runSpawn(['main.py', '--ctrl-port', String(this.ctrlPort)], true, {
+          stdoutCb: async () => {
+            const pids = await this.matchPort(this.ctrlPort);
+            if (pids.length) {
+              this.pids = pids;
+              await this.connect();
+              resolve('Python t3Py service started successfully');
+            }
+            reject(new Error('Process did not start as expected'));
+          },
+        }),
+      );
     } catch (error) {
       throw new Error(`Failed to start Python t3Py service: ${error}`);
     }
@@ -148,26 +141,21 @@ class ConnectService extends PythonService {
 
   public async terminate(): Promise<void> {
     try {
-      if (this.socket) {
-        this.socket.close();
-        this.socket = null;
-      }
+      // ctrl socket
+      if (this.socket) this.socket.close();
+      this.socket = null;
 
-      if (this.pool) {
-        await this.pool.terminate(true);
-        this.pool = null;
-      }
+      // log socket
+      if (this.pool) await this.pool.terminate(true);
+      this.pool = null;
 
+      // process
       if (!this.pids.length) {
-        const args = [this.uvBinaryPath, 'run', 'main.py', '--ctrl-port', String(this.ctrlPort)];
-        const pids = await this.matchProcess(args.join(' '));
+        const pids = await this.matchPort(this.ctrlPort);
         if (pids.length) this.pids = pids;
       }
 
-      if (this.pids.length) {
-        await this.killProcess(this.pids);
-      }
-
+      if (this.pids.length) await this.killProcess(this.pids);
       this.pids = [];
     } catch (error) {
       logger.error('Error during termination:', error as Error);
@@ -187,7 +175,6 @@ export class T3PyAdapter {
   ext: string = '';
 
   code: string = '';
-  pids: number[] = [];
 
   constructor(source: IConstructorOptions) {
     this.api = source.api!;
@@ -203,7 +190,7 @@ export class T3PyAdapter {
     await connectService.terminate();
   }
 
-  async execCtx(type: string, options: any[] = []): Promise<any> {
+  private async execCtx(type: string, options: any[] = []): Promise<any> {
     const socket = connectService.getSocket();
     if (!socket) {
       throw new Error('Socket is not initialized.');
@@ -214,14 +201,12 @@ export class T3PyAdapter {
     const [reply] = await socket.receive();
     const result = JSON.parse(reply.toString());
 
-    if (result?.error) {
-      throw new Error(result.error);
-    }
+    if (result?.error) throw new Error(result.error);
 
     return result;
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let content = '';
     if (this.api.startsWith('http')) {
       const { data } = await request.request({ url: this.api, method: 'GET' });
@@ -233,7 +218,7 @@ export class T3PyAdapter {
     return resp;
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const resp = await this.execCtx('homeContent', [true]);
 
     const rawClassList = Array.isArray(resp?.class) ? resp.class : [];
@@ -262,7 +247,7 @@ export class T3PyAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const resp = await this.execCtx('homeVideoContent', []);
 
     const rawList = Array.isArray(resp?.list) ? resp.list : [];
@@ -284,7 +269,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page = 1, extend = {} } = doc || {};
     const resp = await this.execCtx('categoryContent', [tid, page, Object.keys(extend).length > 0, extend]);
 
@@ -307,7 +292,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const resp = await this.execCtx('detailContent', [[ids]]);
 
@@ -342,7 +327,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
     const resp = await this.execCtx('searchContent', [wd, false, page]);
 
@@ -365,7 +350,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc || {};
     const resp = await this.execCtx('playerContent', [flag, play, []]);
 
@@ -391,12 +376,18 @@ export class T3PyAdapter {
     return res;
   }
 
-  async proxy(doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async action(doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    const { action, value, timeout } = doc || {};
+    const resp = await this.execCtx('actionContent', [action, value, timeout]);
+    return resp;
+  }
+
+  async proxy(doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     const resp = await this.execCtx('localProxy', [doc]);
     return resp;
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 }

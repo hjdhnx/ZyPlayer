@@ -103,6 +103,7 @@ const handleExecute = () => {
 
     MessagePlugin.success(t('common.success'));
   } catch (error) {
+    output.value = '';
     console.error(error);
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
   }
@@ -114,9 +115,8 @@ const handleCopy = async (e: Event) => {
 
   try {
     await navigator.clipboard.writeText(val);
-    MessagePlugin.info(t('common.copySuccess'));
+    MessagePlugin.success(t('common.copySuccess'));
   } catch (error) {
-    output.value = '';
     MessagePlugin.error(`${t('common.error')}:  ${(error as Error).message}`);
   }
 };

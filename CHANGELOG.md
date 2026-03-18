@@ -2,18 +2,74 @@
 
 > All notable changes to this project will be documented in this file.
 
-## 3.4.2
+## 3.4.4
 
-- 修复: 实验室-写源工具 文件目录在未创建时打开失败
-- 修复: 主进程未捕获告警日志
+- 优化: mac/window侧边栏配色
+- 修复: windows x64平台调用npminstall失败
+- 修复: 改进更新行为，防止意外自动更新
+- 修复: window部分情况关闭窗口导致整个应用程序崩溃; arm平台打包失败
 - 变动: 依赖库升级
 
+[View on GitHub](https://github.com/Hiram-Wong/ZyPlayer/releases/tag/v3.4.4)
 
-## 3.4.1
+## 3.4.3 (2026-03-14)
+
+- 特性: vscode增加mcp工具
+- 特性: 支持影视action动作操作(action组件)
+- 优化: 简化hash路由加载
+- 优化: ip接口参数ipv4/ipv6优先缺失; 增加结果isChinaMainland字段
+- 优化: 鸿蒙操作系统标识识别
+- 优化: 数据配置-快捷配置 兼容直接导入频道
+- 优化: webview组件 src参数以支持默认加载
+- 优化: terminal组件 渲染样式
+- 优化: github action cicd引用仓库node版本
+- 修复: 影视 适配器初始化失败无具体报错信息; 适配器类型标注优化; T3Alist和T3Catopen适配器ext参数序列化处理, T3Drpy和T3Catopen缓存冲突以及执行失败无日志打印; T3Py适配器引用错误参数, 关闭时zmq有未返回时将阻塞主进程, 启动时获取pid不全, 部分情况进程异常退出, 不激活venv导致环境异常, 使用端口替代参数关键词匹配进程; 数据源检测vod—tag为folder或action报错(直接放行, 检测无意义)
+- 修复: 实验室-写源工具 首次加载非js适配器时提示语法报错; 代理上传处理三元组失败
+- 修复: 直播配置 上传时文件筛选参数错误
+- 修复: 历史记录 影视缺失集数数据; 接口进度跳过参数不返回
+- 修复: 同步请求模块 application/json处理错误
+- 修复: 缩放 尺寸计算错误; 刷新丢失缩放比例; 数值组件改为滑块; mac系统缩放不同步; 比例最大值和最小值
+- 修复: common-nav组件 像素计算错误; 重复滚动; 点击部分dom再点击第一个将滚动至最后; 切换页面(或搜索结果点击)搜索列表丢失; 搜索结果清空不触发滚动
+- 修复: dialog-document组件 类型错误; 文件名错误
+- 修复: search-panel组件 输入框有内容时清空按钮替代搜索按钮(因为搜索图标没实际效果) -> 点击生效
+- 修复: emitter 1.x -> 2.x 事件接收变动适配
+- 修复: ua含有控制字符时主程序崩溃
+- 修复: 影视分类只有一个时触发folder模式时没有重置按钮
+- 修复: 部分机器判断electron环境报错
+- 修复: MacOS Tahoe(26)以下操作系统交通灯位置错位
+- 修复: 复制成功提示类型错误 info -> success
+- 修复: ui库 alert组件info颜色错误; qrcode组件样式错误
+- 变动: 参数歧义 isChinaMainland(中国大陆) -> isCHS(简体中文)
+- 变动: 依赖库升级
+
+[View on GitHub](https://github.com/Hiram-Wong/ZyPlayer/releases/tag/v3.4.3)
+
+## 3.4.2 (2026-02-15)
+
+- 特性: 支持配置缩放
+- 修复: 设置-基础配置 无效超时参数检测不符合逻辑(改为失焦校验)
+- 修复: 实验室-写源工具 文件目录在未创建时打开失败
+- 修复: AIGC 存在思考过程时一直显示思考中; 思考样式颜色错误; prompt提示词优化
+- 修复: 主进程未捕获告警日志
+- 修复: 部分参数未使用环境变量
+- 修复: 单词拼写错误(outher -> other)
+- 修复: 进程匹配不精确导致结束进程找不到
+- 修复: 影视检查可用性逻辑错误; 支持仅搜索检查; t3_py适配器增加类型标注
+- 修复: swagger文档部分参数解释缺失
+- 修复: uv处理依赖时证书错误
+- 修复: 扩展程序在启用/禁用/卸载时ipc通讯时参数序列化失败
+- 修复: 同步请求模块: fetch不必要的类型转换导致性能消耗; fetch请求体ContentType大小写错误; fetchCookie序列化错误; convertBase64Image错误; 取消对请求体Referer的处理
+- 变动: cdp嗅探: 默认规则启用 -> 未传自定义规则时启用
+- 变动: 影视适配器hiker公共库路径变动
+- 变动: 依赖库升级
+
+[View on GitHub](https://github.com/Hiram-Wong/ZyPlayer/releases/tag/v3.4.2)
+
+## 3.4.1 (2026-02-08)
 
 > 破坏性更新
 
-- 特性: 支持软件级网络代理(worker进程除外) [issue #437]
+- 特性: 支持软件级网络代理(子进程请求除外) [issue #437]
 - 特性: 硬件加速回归
 - 特性: 影视/电视/解析均提供检查可用性
 - 特性: 日志支持sse流输出(仅主程序日志)

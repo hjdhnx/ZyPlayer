@@ -5,23 +5,22 @@ import { APP_NAME, APP_VERSION } from '@shared/config/appinfo';
 import type { IArch, IPlatform, ISystemInfo } from '@shared/types/systeminfo';
 import { app } from 'electron';
 import macosRelease from 'macos-release';
-import windowsRelease from 'windows-release';
 
 export const platform: IPlatform = (() => {
-  const plat = process.platform as NodeJS.Platform | 'ohos';
+  const plat = process.platform as NodeJS.Platform | 'ohos' | 'openharmony' | 'harmonyos';
   if (plat === 'win32') return 'win32';
   if (plat === 'darwin') return 'darwin';
   if (plat === 'linux') return 'linux';
-  if (plat === 'ohos') return 'ohos';
+  if (plat === 'ohos' || plat === 'openharmony' || plat === 'harmonyos') return 'ohos';
   return 'unknown';
 })();
 
 export const release: string = (() => {
-  const plat = process.platform as NodeJS.Platform | 'ohos';
-  if (plat === 'win32') return windowsRelease() || 'unknown';
+  const plat = process.platform as NodeJS.Platform | 'ohos' | 'openharmony' | 'harmonyos';
+  if (plat === 'win32') return os.release();
   if (plat === 'darwin') return macosRelease().version;
   if (plat === 'linux') return os.release();
-  if (plat === 'ohos') return os.release();
+  if (plat === 'ohos' || plat === 'openharmony' || plat === 'harmonyos') return os.release();
   return 'unknown';
 })();
 
@@ -43,12 +42,12 @@ export const isLinux: boolean = platform === 'linux';
 export const isOhOS: boolean = platform === 'ohos';
 
 export const isMacOSTahoe = isMacOS && Number.parseInt(macosRelease().version) >= 26;
-export const isWindows11 =
+export const isWindows22H2 =
   isWindows &&
   (() => {
     const parts = os.release().split('.');
     const buildNumber = Number.parseInt(parts[2], 10);
-    return buildNumber >= 22000;
+    return buildNumber >= 22621;
   })();
 
 export const isElectron: boolean = !!(process?.versions && process?.versions.electron);

@@ -1,4 +1,7 @@
 export default {
+  action: {
+    countdown: '{0}s to close',
+  },
   hot: {
     title: 'Hot Searches',
     category: {

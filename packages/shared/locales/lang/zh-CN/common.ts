@@ -96,6 +96,7 @@ export default {
   log: '日志',
   cache: '缓存',
   support: '支持',
+  unSupport: '不支持',
   scan: '扫描',
   space: '空格',
   data: '数据',

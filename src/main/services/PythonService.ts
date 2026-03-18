@@ -1,5 +1,7 @@
+import type { ChildProcessByStdio } from 'node:child_process';
 import { execSync, spawn } from 'node:child_process';
 import { join } from 'node:path';
+import type { Stream } from 'node:stream';
 
 import { loggerService } from '@logger';
 import { pathExist } from '@main/utils/file';
@@ -18,6 +20,7 @@ export interface IPythonOptions {
 export class PythonService {
   projectBasePath: string;
   uvBinaryPath: string;
+  childProcess: ChildProcessByStdio<null, Stream.Readable, Stream.Readable> | null = null;
 
   constructor(options: IPythonOptions) {
     this.projectBasePath = options.projectBasePath;
@@ -80,15 +83,18 @@ export class PythonService {
 
   runSpawn(
     args: string[] = [],
-    stdoutCb?: (data: string) => void,
-    stderrCb?: (data: string) => void,
-    errorCb?: (error: Error) => void,
-    closeCb?: (code: number | null) => void,
+    venv: boolean = false,
+    cb: {
+      stdoutCb?: (data: string) => void;
+      stderrCb?: (data: string) => void;
+      errorCb?: (error: Error) => void;
+      closeCb?: (code: number | null) => void;
+    } = {},
   ): void {
     try {
       logger.debug(`Spawning Python process with args: ${args.join(' ')}`);
 
-      const cmd = ['run', ...args];
+      const cmd = ['run', ...(venv ? ['--active'] : []), ...args];
       const child = spawn(this.uvBinaryPath, cmd, {
         cwd: this.projectBasePath,
         detached: false,
@@ -96,21 +102,22 @@ export class PythonService {
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: false,
       });
+      this.childProcess = child;
 
       child.stdout.on('data', (data) => {
-        stdoutCb?.(data.toString());
+        cb?.stdoutCb?.(data.toString());
       });
 
       child.stderr.on('data', (data) => {
-        stderrCb?.(data.toString());
+        cb?.stderrCb?.(data.toString());
       });
 
       child.on('error', (error) => {
-        errorCb?.(error);
+        cb?.errorCb?.(error);
       });
 
       child.on('close', (code) => {
-        closeCb?.(code);
+        cb?.closeCb?.(code);
       });
     } catch (error) {
       logger.error('Error while starting Python process:', error as Error);
@@ -118,9 +125,9 @@ export class PythonService {
     }
   }
 
-  async runExec(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  async runExec(args: string[], venv: boolean = false): Promise<{ stdout: string; stderr: string }> {
     try {
-      const cmd = [this.uvBinaryPath, 'run', ...args];
+      const cmd = [this.uvBinaryPath, 'run', ...(venv ? ['--active'] : []), ...args];
       const { stdout, stderr } = await execAsync(cmd.join(' '), {
         cwd: this.projectBasePath,
         windowsHide: true,
@@ -133,9 +140,9 @@ export class PythonService {
     }
   }
 
-  runExecSync(args: string[]): { stdout: string; stderr: string } {
+  runExecSync(args: string[], venv: boolean = false): { stdout: string; stderr: string } {
     try {
-      const cmd = [this.uvBinaryPath, 'run', ...args];
+      const cmd = [this.uvBinaryPath, 'run', ...(venv ? ['--active'] : []), ...args];
       const output = execSync(cmd.join(' '), {
         cwd: this.projectBasePath,
         windowsHide: true,

@@ -1,4 +1,4 @@
-import { isStrEmpty } from '@shared/modules/validate';
+import { isStrEmpty } from './validate';
 
 /**
  * Input validation and cleaning
@@ -23,7 +23,7 @@ const splitToWords = (str: string, delimiter: string = '-'): string[] => {
 };
 
 /**
- * Convert string to camelCase format
+ * Convert string to camel-case format
  * @param str Input string
  * @param delimiter Separator, defaults to '-'
  * @param newDelimiter Output separator, defaults to ''
@@ -43,7 +43,7 @@ export const camelCase = (str: string, delimiter: string = '-', newDelimiter: st
 };
 
 /**
- * Convert string to PascalCase format
+ * Convert string to pascal-case format
  * @param str Input string
  * @param delimiter Separator, defaults to '-'
  * @param newDelimiter Output separator, defaults to ''
@@ -91,7 +91,7 @@ export const kebabCase = (str: string, delimiter: string = '-'): string => {
 };
 
 /**
- * Convert string to CONSTANT_CASE format
+ * Convert string to constant_case format
  * @param str Input string
  * @param delimiter Separator, defaults to '-'
  * @returns CONSTANT_CASE formatted string
@@ -105,7 +105,7 @@ export const constantCase = (str: string, delimiter: string = '-'): string => {
 };
 
 /**
- * Convert string to Title Case format
+ * Convert string to title-case format
  * @param str Input string
  * @param delimiter Separator, defaults to '-'
  * @returns Title Case formatted string

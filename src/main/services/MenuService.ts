@@ -1,7 +1,12 @@
 import { t } from '@main/services/AppLocale';
+import { dbService } from '@main/services/DbService';
+import { windowService } from '@main/services/WindowService';
 import { isMacOS } from '@main/utils/systeminfo';
 import { APP_NAME } from '@shared/config/appinfo';
-import type { MenuItemConstructorOptions } from 'electron';
+import { IPC_CHANNEL } from '@shared/config/ipcChannel';
+import { WINDOW_NAME } from '@shared/config/window';
+import { isNil } from '@shared/modules/validate';
+import type { BrowserWindow, MenuItem, MenuItemConstructorOptions } from 'electron';
 import { Menu } from 'electron';
 
 class MenuService {
@@ -71,9 +76,50 @@ class MenuService {
           { label: t('system.view.forceReload'), role: 'forceReload' },
           { label: t('system.view.toggleDevTools'), role: 'toggleDevTools' },
           { type: 'separator' },
-          { label: t('system.view.actualSize'), role: 'resetZoom' },
-          { label: t('system.view.zoomIn'), role: 'zoomIn' },
-          { label: t('system.view.zoomOut'), role: 'zoomOut' },
+          {
+            label: t('system.view.actualSize'),
+            // role: 'resetZoom',
+            accelerator: 'CmdOrCtrl+0',
+            click: async () => {
+              windowService.setZoomWindows(1);
+              await dbService.setting.update({ key: 'zoom', value: 1 });
+
+              const mainWindow = windowService.getWindow(WINDOW_NAME.MAIN);
+              if (!isNil(mainWindow)) mainWindow.webContents.send(IPC_CHANNEL.ZOOM_UPDATED, 1);
+            },
+          },
+          {
+            label: t('system.view.zoomIn'),
+            // role: 'zoomIn',
+            accelerator: 'CmdOrCtrl+=',
+            click: async (_menuItem: MenuItem, window: BrowserWindow) => {
+              const currentZoom = window.webContents.getZoomFactor();
+              const zoom = currentZoom + 0.2;
+              if (zoom < 0.8 || zoom > 1.8) return;
+
+              windowService.setZoomWindows(zoom);
+              await dbService.setting.update({ key: 'zoom', value: zoom });
+
+              const mainWindow = windowService.getWindow(WINDOW_NAME.MAIN);
+              if (!isNil(mainWindow)) mainWindow.webContents.send(IPC_CHANNEL.ZOOM_UPDATED, zoom);
+            },
+          },
+          {
+            label: t('system.view.zoomOut'),
+            // role: 'zoomOut',
+            accelerator: 'CmdOrCtrl+-',
+            click: async (_menuItem: MenuItem, window: BrowserWindow) => {
+              const currentZoom = window.webContents.getZoomFactor();
+              const zoom = currentZoom - 0.2;
+              if (zoom < 0.8 || zoom > 1.8) return;
+
+              windowService.setZoomWindows(zoom);
+              await dbService.setting.update({ key: 'zoom', value: zoom });
+
+              const mainWindow = windowService.getWindow(WINDOW_NAME.MAIN);
+              if (!isNil(mainWindow)) mainWindow.webContents.send(IPC_CHANNEL.ZOOM_UPDATED, zoom);
+            },
+          },
           { type: 'separator' },
           { label: t('system.view.toggleFullScreen'), role: 'togglefullscreen' },
         ],

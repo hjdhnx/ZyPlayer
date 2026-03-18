@@ -2,13 +2,14 @@ import { Buffer } from 'node:buffer';
 import path from 'node:path';
 import process from 'node:process';
 
-import { getHome, headersPascalCase } from '@shared/modules/headers';
+import { headersPascalCase } from '@shared/modules/headers';
 import { toString } from '@shared/modules/toString';
+import { isJsonStr } from '@shared/modules/validate';
 import FormData from 'form-data';
 import fs from 'fs-extra';
+import JSON5 from 'json5';
 import mime from 'mime-types';
 import protobuf from 'protobufjs';
-import qs from 'qs';
 import syncFetch from 'sync-fetch';
 
 import { MOBILE_UA, PC_UA } from '../ua';
@@ -54,8 +55,6 @@ interface RequestOptions {
 const fetch = (url: string, options: RequestOptions = {}) => {
   try {
     const method: HttpMethod = (options.method || 'GET').toUpperCase() as HttpMethod;
-    url = new URL(url).href;
-
     const headers = headersPascalCase(options?.headers || {});
 
     const config: {
@@ -74,32 +73,22 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     if (!config.headers['User-Agent']) {
       config.headers['User-Agent'] = MOBILE_UA;
     }
-
-    if (!config.headers.Referer) {
-      config.headers.Referer = getHome(url);
-    }
-
-    if (/[\u4E00-\u9FA5\u3000-\u303F\uFF00-\uFFEF]/.test(config.headers.Referer)) {
-      config.headers.Referer = new URL(config.headers.Referer).href;
+    if (!config.headers?.Accept) {
+      config.headers!.Accept = '*/*';
     }
 
     const contentType = config.headers?.['Content-Type'] || '';
     let charset: string = 'utf-8';
-
     if (contentType.includes('charset=')) {
-      const matchRes = contentType.match(/charset=[\w-]+/);
-      if (matchRes && matchRes.length > 0) {
-        const charsetMatch = matchRes[0].match(/charset=([\w-]+)/);
-        if (charsetMatch && charsetMatch.length > 1) {
-          charset = charsetMatch[1];
-        }
-      }
+      const match = contentType.match(/charset=([\w-]+)/i);
+      if (match?.[1]) charset = match[1];
     }
 
     if (method !== 'GET') {
       if (contentType.includes('application/x-www-form-urlencoded')) {
-        const body = qs.parse(options.body as string) as Record<string, string>;
-        config.body = new URLSearchParams(body).toString();
+        const rawBody = isJsonStr(options.body) ? JSON5.parse(options.body as string) : options.body;
+        const body = new URLSearchParams(rawBody).toString();
+        config.body = body;
       } else if (['text/plain', 'text/html', 'text/xml'].includes(contentType)) {
         config.body = options.body;
       } else if (contentType.includes('multipart/form-data')) {
@@ -144,31 +133,30 @@ const fetch = (url: string, options: RequestOptions = {}) => {
         }
         config.body = raw;
       } else {
-        if (!config.headers['content-type']) config.headers['Content-Type'] = 'application/json';
-        const body = qs.parse(options.body as string);
-        config.body = JSON.stringify(body);
+        if (!contentType) config.headers!['Content-Type'] = 'application/json';
+
+        const rawBody = isJsonStr(options.body) ? JSON5.parse(options.body as string) : options.body;
+        const body = JSON.stringify(rawBody);
+        config.body = body;
       }
     }
 
-    console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
+    // console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
     const resp = syncFetch(url, config);
-    resp.getBody = function (encoding: BufferEncoding | undefined) {
+    resp.getBody = function (encoding: BufferEncoding | undefined): string | Buffer {
       const buffer = resp.buffer();
-      return encoding ? Buffer.from(buffer).toString(encoding) : buffer;
+      return encoding ? buffer.toString(encoding) : buffer;
     };
 
     const { onlyHeaders, withHeaders, withStatusCode, toHex } = options || {};
 
-    // 仅返回 headers 的场景
     if (onlyHeaders) {
       return toString(resp.headers.raw());
     }
 
-    // 处理响应体
-    const content = toHex ? Buffer.from(resp.getBody()).toString('hex') : resp.getBody(charset);
+    const content = toHex ? resp.getBody('hex') : resp.getBody(charset);
 
-    // 仅返回非 headers 或 statusCode 的场景
     if (!(withHeaders || withStatusCode)) {
       return toString(content);
     }
@@ -190,11 +178,14 @@ const fetchCookie = (url: string, options: RequestOptions = {}) => {
   if (options?.withHeaders) delete options.withHeaders;
   if (options?.withStatusCode) delete options.withStatusCode;
   if (options?.toHex) delete options.toHex;
+
   options = Object.assign(options, { onlyHeaders: true });
-  const header = fetch(url, options) || {};
-  const setCk = Object.keys(header).find((it) => it.toLowerCase() === 'set-cookie');
-  const cookie = setCk ? header[setCk] : '[]';
-  return toString(cookie);
+
+  const headerStr = fetch(url, options) || '{}';
+  const headerObj = JSON5.parse(headerStr);
+  const setCk = Object.keys(headerObj).find((it) => it.toLowerCase() === 'set-cookie');
+  const cookie = setCk ? headerObj[setCk] : [];
+  return JSON.stringify(cookie);
 };
 
 const post = (url: string, options: RequestOptions = {}) => {
@@ -226,12 +217,13 @@ const convertBase64Image = (url: string, options: RequestOptions = {}) => {
     if (options?.withStatusCode) delete options.withStatusCode;
     if (options?.toHex) delete options.toHex;
     if (options?.onlyHeaders) delete options.onlyHeaders;
+
     options = Object.assign(options, { toHex: true });
-    const res = fetch(url, options) || '{"body":""}';
-    const formatRes = JSON.parse(res);
-    const hexStr = formatRes.body;
+
+    const hexStr = fetch(url, options);
+    if (!hexStr) return '';
     const base64String = Buffer.from(hexStr, 'hex').toString('base64');
-    return `data:${mime.lookup(url)};base64,${base64String}`;
+    return `data:${mime.lookup(url) || 'image/png'};base64,${base64String}`;
   } catch (error) {
     console.error(error);
     return '';
@@ -241,9 +233,7 @@ const convertBase64Image = (url: string, options: RequestOptions = {}) => {
 const batchFetch = (requests: any[], threads: number = 16) => {
   const results: any[] = [];
   const processBatch = (batchSize: number, index: number = 0) => {
-    // 如果当前索引小于请求数组的长度，说明还有请求需要处理
     if (index < requests.length) {
-      // 处理当前批次的请求
       const batch = requests.slice(index, index + batchSize);
       for (const request of batch) {
         try {
@@ -253,12 +243,10 @@ const batchFetch = (requests: any[], threads: number = 16) => {
           results.push(`Request to ${request.url} failed: ${(error as Error).message}`);
         }
       }
-      // 递归处理下一批请求
       processBatch(batchSize, index + batchSize);
     }
   };
 
-  // 根据请求总数决定批次大小，超过16个请求则分批处理
   const batchSize = requests.length > threads ? threads : requests.length;
   processBatch(batchSize);
   return results;

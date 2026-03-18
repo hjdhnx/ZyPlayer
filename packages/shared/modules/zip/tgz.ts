@@ -1,7 +1,7 @@
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import { isStrEmpty, isString } from '@shared/modules/validate';
+import { isStrEmpty, isString } from '../validate';
 
 const execAsync = promisify(exec);
 

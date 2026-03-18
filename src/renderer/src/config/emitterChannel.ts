@@ -1,4 +1,6 @@
 export enum emitterChannel {
+  REFRESH_VIEW = 'refresh:view',
+
   // config
   REFRESH_HISTORY_CONFIG = 'refresh:history-config',
   REFRESH_LIVE_CONFIG = 'refresh:live-config',

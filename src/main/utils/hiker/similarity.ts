@@ -14,7 +14,13 @@ export interface ILCSMatch {
   lcs: ILCSResult;
 }
 
-const compareTwoStrings = (first: string, second: string): number => {
+/**
+ * Compare the similarity between two strings
+ * @param first first string
+ * @param second second string
+ * @returns similarity value (between 0 and 1)
+ */
+export const compareTwoStrings = (first: string, second: string): number => {
   // Normalize the strings by removing spaces
   const cleanedFirst = first.replace(/\s+/g, '');
   const cleanedSecond = second.replace(/\s+/g, '');
@@ -47,6 +53,12 @@ const compareTwoStrings = (first: string, second: string): number => {
   return (2 * intersectionSize) / (cleanedFirst.length + cleanedSecond.length - 2);
 };
 
+/**
+ * Find the best match in the target string array for the main string
+ * @param mainString main string
+ * @param targetStrings target string array
+ * @returns object containing all ratings and the best match
+ */
 export const findBestMatch = (
   mainString: string,
   targetStrings: string[],
@@ -67,14 +79,18 @@ export const findBestMatch = (
   return { ratings, bestMatch: ratings[bestMatchIndex], bestMatchIndex };
 };
 
+/**
+ * Calculate the longest common subsequence of two strings
+ * @param str1 - first string
+ * @param str2 - second string
+ * @returns  object containing length, sequence, and offset
+ */
 export const lcs = (str1: string, str2: string): ILCSResult => {
   if (!str1 || !str2) return { length: 0, sequence: '', offset: 0 };
 
   const str1Length = str1.length;
   const str2Length = str2.length;
-  const dp = Array.from({ length: str1Length }, () => {
-    return Array.from({ length: str2Length }).fill(0);
-  }) as number[][];
+  const dp = Array.from({ length: str1Length }).fill(Array.from({ length: str2Length }).fill(0)) as number[][];
 
   let maxLen = 0;
   let endIndex = 0;
@@ -99,6 +115,12 @@ export const lcs = (str1: string, str2: string): ILCSResult => {
   return { length: maxLen, sequence, offset };
 };
 
+/**
+ * Find the match with the longest LCS in the target string array for the main string
+ * @param mainString - main string
+ * @param targetStrings - target string array
+ * @returns  object containing all LCS results and the best match
+ */
 export const findBestLCS = (
   mainString: string,
   targetStrings: string[],

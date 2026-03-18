@@ -3,6 +3,7 @@ from pathlib import Path
 
 CTRL_ADDR = "tcp://127.0.0.1:19979"
 code = Path("demo.py").read_text(encoding="utf-8")
+# code = ""
 
 ctx = zmq.Context()
 ctrl_socket = ctx.socket(zmq.REQ)
@@ -16,7 +17,7 @@ def send_request(method, options=None):
     reply = ctrl_socket.recv_string()
     return reply
 
-reply_init = send_request("init")
+reply_init = send_request("init", [""])
 print("init reply:", reply_init)
 
 reply_home = send_request("homeContent", [""])

@@ -1,19 +1,7 @@
 import { request } from '@main/utils/request';
 import { aes } from '@shared/modules/crypto';
 import { buildUrl } from '@shared/modules/headers';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 
 class T3AppGetAdapter {
   private host: string = '';
@@ -72,7 +60,7 @@ class T3AppGetAdapter {
     }
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const resp = await request.request({
       url: buildUrl(this.host, `/${this.API[this.muban].initV}`),
       method: 'POST',
@@ -121,11 +109,11 @@ class T3AppGetAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     return { list: [], page: 1, pagecount: 0, total: 0 };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { page, tid, extend = {} } = doc || {};
 
     const resp = await request.request({
@@ -159,7 +147,7 @@ class T3AppGetAdapter {
     return { list };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc;
     const idsArr = ids.split(/[,，]/).map((c) => c.trim());
 
@@ -226,7 +214,7 @@ class T3AppGetAdapter {
     return { list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page } = doc || {};
 
     const resp = await request.request({
@@ -252,7 +240,7 @@ class T3AppGetAdapter {
     return { list };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { play } = doc;
 
     const json = JSON.parse(play);
@@ -309,7 +297,15 @@ class T3AppGetAdapter {
     return { parse: 1, jx: this.isofficial(url) ? 1 : 0, url };
   }
 
-  async runMain(): Promise<any> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    return '';
+  }
+
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
+    return [];
+  }
+
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 

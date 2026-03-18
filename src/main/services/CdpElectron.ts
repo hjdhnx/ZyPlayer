@@ -276,19 +276,22 @@ export class CdpElectron {
             return req.continue();
           }
 
-          if (customRegex && new RegExp(customRegex, 'gi').test(reqUrl)) {
-            logger.info(`Sniffer media custom match, url: ${reqUrl}`);
-            resolve({ url: reqUrl, headers: reqHeaders });
-            return req.abort();
-          }
+          if (customRegex) {
+            if (new RegExp(customRegex, 'gi').test(reqUrl)) {
+              logger.info(`Sniffer media custom match, url: ${reqUrl}`);
+              resolve({ url: reqUrl, headers: reqHeaders });
+              return req.abort();
+            }
+          } else {
+            const videoMatchRegex: RegExp =
+              /http(?:(?!http).){12,}?\.(?:m3u8|mpd|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3|tos)\?.*|http(?:(?!http).){12,}\.(?:m3u8|mpd|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http(?:(?!http).)*?video\/tos*|http(?:(?!http).)*?obj\/tos*/;
+            const videoExcludeRegex: RegExp = /\.(?:css|html)$|url=http|v=http/i;
 
-          const videoMatchRegex: RegExp =
-            /http(?:(?!http).){12,}?\.(?:m3u8|mpd|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3|tos)\?.*|http(?:(?!http).){12,}\.(?:m3u8|mpd|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http(?:(?!http).)*?video\/tos*|http(?:(?!http).)*?obj\/tos*/;
-          const videoExcludeRegex: RegExp = /\.(?:css|html)$|url=http|v=http/i;
-          if (videoMatchRegex.test(reqUrl) && !videoExcludeRegex.test(reqUrl)) {
-            logger.info(`Sniffer media default match, url: ${reqUrl}`);
-            resolve({ url: reqUrl, headers: reqHeaders });
-            return req.abort();
+            if (videoMatchRegex.test(reqUrl) && !videoExcludeRegex.test(reqUrl)) {
+              logger.info(`Sniffer media default match, url: ${reqUrl}`);
+              resolve({ url: reqUrl, headers: reqHeaders });
+              return req.abort();
+            }
           }
 
           if (

@@ -129,7 +129,7 @@ watch(
     const isEq = isEqual(newVal, oldVal);
     if (isEq) return;
 
-    menuList.value = Array.from(new Map(newVal.map((menuItem) => [menuItem.type_id, menuItem])).values());
+    menuList.value = [...new Map(newVal.map((menuItem) => [menuItem.type_id, menuItem])).values()];
     defaultConfig();
     debouncedRedrawElement();
   },

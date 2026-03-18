@@ -1,6 +1,7 @@
 reject:
   # Electron
   - vite
+  - '@electron/notarize'
   - electron
   - electron-builder
   - electron-updater
@@ -26,6 +27,10 @@ reject:
   - '@vitest/web-worker'
 
   # Others
+  - '@types/node'
   - eslint
   - monaco-editor
+  - npminstall
+  - pnpm
+  - proxy-agent
   - undici

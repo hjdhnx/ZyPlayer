@@ -85,11 +85,16 @@ export default antfu(
         '@typescript-eslint/no-use-before-define': 'off',
         'no-use-before-define': 'off',
 
+        /* Disable e18e */
+        'e18e/prefer-static-regex': 'off',
+        'e18e/ban-dependencies': 'off',
+
         /* Disable antfu sort, use simple sort import */
         'perfectionist/sort-imports': 'off',
         'perfectionist/sort-named-imports': 'off',
         'simple-import-sort/imports': 'error',
         'simple-import-sort/exports': 'error',
+
         // Disable unused-imports rules in other presets
         'unused-imports/no-unused-imports': 'off',
         'unused-imports/no-unused-vars': 'off',

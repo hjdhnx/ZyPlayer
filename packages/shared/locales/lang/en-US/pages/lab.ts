@@ -222,8 +222,8 @@ export default {
     field: {
       initScript: 'Init Script',
       runScript: 'Run Script',
-      customRegex: 'Custom Regex',
-      snifferExclude: 'Sniffer Exclude',
+      customRegex: 'Match',
+      snifferExclude: 'Exclude',
     },
   },
   player: {

@@ -225,6 +225,7 @@
   </div>
 </template>
 <script setup lang="tsx">
+import { PROXY_API } from '@shared/config/env';
 import {
   isArray,
   isArrayEmpty,
@@ -253,7 +254,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import type { PropType } from 'vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, toRaw, watch } from 'vue';
 
 import {
   fetchCmsDetail,
@@ -277,7 +278,6 @@ import type { IStorePlayer } from '@/config/player';
 import { t } from '@/locales';
 import type { IVideoOptions, IVideoProcess } from '@/types/player';
 import emitter from '@/utils/emitter';
-import { proxyApi } from '@/utils/env';
 
 import DialogDownloadView from './DialogDownload.vue';
 import DialogSettingView from './DialogSetting.vue';
@@ -564,9 +564,6 @@ const onSettingChange = (item) => {
   const { skipTimeInStart = 30, skipTimeInEnd = 30, skipHeadAndEnd, playNextPreload, playNextEnabled, skipAd } = item;
 
   /** sync skip time */
-  historyData.value.skipTimeInStart = skipTimeInStart;
-  historyData.value.skipTimeInEnd = skipTimeInEnd;
-
   videoData.value.skipTimeInStart = skipTimeInStart;
   videoData.value.skipTimeInEnd = skipTimeInEnd;
 
@@ -690,7 +687,7 @@ const handleSwitchRecommendItem = async (item: IRecMatch) => {
   videoData.value = { url: '', playEnd: false, watchTime: 0, duration: 0, skipTimeInStart: 30, skipTimeInEnd: 30 };
 
   await emits('update', {
-    data: Object.assign({}, { info, extra: extraConf.value }),
+    data: toRaw({ info, extra: extraConf.value }),
   });
   setup();
 };
@@ -755,7 +752,7 @@ const getDirectPlayUrl = async (
 
   // Direct play
   if (playRes.parse === 0 && playRes.jx !== 1) {
-    if (playRes.url.startsWith(proxyApi)) {
+    if (playRes.url.startsWith(PROXY_API)) {
       const { searchParams } = new URL(playRes.url);
       const proxyParams = Object.fromEntries(searchParams.entries());
       const proxyData = await fetchCmsProxy({ uuid: extraConf.value.active.id, ...proxyParams });

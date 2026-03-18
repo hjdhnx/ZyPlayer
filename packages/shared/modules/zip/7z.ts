@@ -1,6 +1,7 @@
-import { isStrEmpty, isString } from '@shared/modules/validate';
 import sevenZipBin from '7zip-bin-full';
 import sevenZip from 'node-7z';
+
+import { isStrEmpty, isString } from '../validate';
 
 const sevenZipPath = sevenZipBin.path7z;
 

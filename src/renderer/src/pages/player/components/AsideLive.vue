@@ -128,7 +128,7 @@ import { DownloadIcon, HeartFilledIcon, HeartIcon, Share1Icon } from 'tdesign-ic
 import InfiniteLoading from 'v3-infinite-loading';
 import type { StateHandler as ILoadStateHdandler } from 'v3-infinite-loading/lib/types';
 import type { PropType } from 'vue';
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, onMounted, ref, toRaw, useTemplateRef, watch } from 'vue';
 
 const props = defineProps({
   store: {
@@ -448,7 +448,7 @@ const handleSwitchChannelItem = async (item: IModels['channel']) => {
   videoData.value = { url: '', playEnd: false, watchTime: 0, duration: 0, skipTimeInStart: 0, skipTimeInEnd: 0 };
 
   await emits('update', {
-    data: Object.assign({}, { info: item, extra: extraConf.value }),
+    data: toRaw({ info: item, extra: extraConf.value }),
   });
   setup();
 };

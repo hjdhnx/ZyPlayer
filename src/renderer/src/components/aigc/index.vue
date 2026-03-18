@@ -50,11 +50,11 @@
 </template>
 <script setup lang="ts">
 import { APP_NAME } from '@shared/config/appinfo';
+import { AIGC_CHAT_COMPLETION_API } from '@shared/config/env';
 import { THEME } from '@shared/config/theme';
-import { isHttp, isNil, isObject, isString } from '@shared/modules/validate';
+import { isHttp, isNil, isObject, isObjectEmpty } from '@shared/modules/validate';
 import type {
   AIMessageContent,
-  ChatContentProps,
   ChatMessagesData,
   ChatRequestParams,
   ChatServiceConfig,
@@ -77,33 +77,37 @@ import { emitterChannel, emitterSource } from '@/config/emitterChannel';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
-import { aigcChatCompletionApi } from '@/utils/env';
 
 /**
  * @see https://tdesign.tencent.com/vue-next/components/chatbot
  */
 
-interface OpenAIStreamChunk {
-  id?: string;
-  object?: string;
-  created?: number;
-  model?: string;
-  choices?: Array<{
-    index: number;
-    delta?: {
-      role?: 'user' | 'assistant' | 'system';
-      content?: string;
-      function_call?: any;
-      reasoning_content?: string;
-    };
-    finish_reason?: string;
-  }>;
-}
+type OpenAIStreamChunk =
+  | {
+      id?: string;
+      object?: string;
+      created?: number;
+      model?: string;
+      choices?: Array<{
+        index: number;
+        delta?: {
+          role?: 'user' | 'assistant' | 'system';
+          content?: string;
+          function_call?: any;
+          reasoning_content?: string;
+        };
+        finish_reason?: string;
+      }>;
+    }
+  | string;
 
 const settingStore = useSettingStore();
 
 const inputValue = ref<string>('');
 const actionComment = ref<'good' | 'bad' | ''>('');
+
+const reasoningCache = ref<string | null>(null);
+const isReasoning = ref<boolean>(false);
 
 const config = ref<{ server: string; key: string; model: string }>({
   server: '',
@@ -122,14 +126,15 @@ const messageProps = ref<TdChatMessageConfig>({
   },
 });
 
-const contentProps = ref<ChatContentProps>({
-  markdownProps: {
+const contentProps = ref({
+  thinking: { maxHeight: 100, collapsed: false },
+  markdown: {
     engine: 'cherry-markdown',
     options: {
       themeSettings: {
         codeBlockTheme: settingStore.displayTheme === THEME.LIGHT ? THEME.LIGHT : THEME.DARK,
-      },
-    } as TdChatContentMDOptions,
+      } as TdChatContentMDOptions,
+    },
   },
 });
 
@@ -158,10 +163,12 @@ const defaultMessages = ref<ChatMessagesData[]>([
 ]);
 
 const chatServiceConfig = ref<ChatServiceConfig>({
-  endpoint: aigcChatCompletionApi,
+  endpoint: AIGC_CHAT_COMPLETION_API,
   stream: true,
   protocol: 'default',
-  onRequest: (params: ChatRequestParams) => {
+  onRequest: (
+    params: ChatRequestParams,
+  ): (ChatRequestParams & RequestInit) | Promise<ChatRequestParams & RequestInit> => {
     return {
       method: 'POST',
       headers: {
@@ -176,42 +183,52 @@ const chatServiceConfig = ref<ChatServiceConfig>({
       }),
     };
   },
-  onMessage: (chunk: SSEChunkData): AIMessageContent | null => {
-    // console.debug('stream message raw data:', chunk);
-
+  onMessage: (chunk: SSEChunkData): AIMessageContent | AIMessageContent[] | null => {
     const data = chunk.data as OpenAIStreamChunk;
 
-    if (isString(data) && data === '[DONE]') {
-      return null;
+    // stream end / invalid
+    if (data === '[DONE]') return null;
+    if (!isObject(data) || isObjectEmpty(data)) return null;
+
+    const delta = data?.choices?.[0]?.delta;
+    if (!isObject(data) || isObjectEmpty(delta)) return null;
+
+    const reasoningContent = delta?.reasoning_content;
+    const mainContent = delta?.content ?? '';
+
+    const content = isNil(reasoningCache.value) ? mainContent : reasoningCache.value + mainContent;
+    reasoningCache.value = null;
+
+    /** ---------- reasoning streaming ---------- */
+    if (!isNil(reasoningContent)) {
+      isReasoning.value = true;
+
+      return {
+        type: 'thinking',
+        data: { title: t('aigc.status.reasoning'), text: reasoningContent },
+        status: 'streaming',
+      };
     }
 
-    if (isObject(data)) {
-      const delta = data?.choices?.[0]?.delta;
-      const reasoningContent = delta?.reasoning_content;
-      const content = delta?.content ?? '';
+    /** ---------- reasoning → content ---------- */
+    if (isReasoning.value && isNil(reasoningContent)) {
+      isReasoning.value = false;
+      reasoningCache.value = content;
 
-      const isReasoning = !isNil(reasoningContent);
+      return {
+        type: 'thinking',
+        data: { title: t('aigc.status.reasoned'), text: '' },
+        status: 'complete',
+      };
+    }
 
-      if (isReasoning) {
-        const isComplete = /完成|结束|finished|done/i.test(reasoningContent);
-
-        return {
-          type: 'thinking',
-          data: {
-            title: isComplete ? t('aigc.status.reasoned') : t('aigc.status.reasoning'),
-            text: reasoningContent,
-          },
-          status: isComplete ? 'complete' : 'streaming',
-        };
-      }
-
-      if (content) {
-        return {
-          type: 'markdown',
-          data: content,
-          strategy: 'merge',
-        };
-      }
+    /** ---------- normal content ---------- */
+    if (content) {
+      return {
+        type: 'markdown',
+        data: content,
+        strategy: 'merge',
+      };
     }
 
     return null;
@@ -325,7 +342,7 @@ const getSetting = async () => {
   }
 };
 
-const reloadConfig = async (eventData: { source: string; data: any }) => {
+const reloadConfig = async ({ data: eventData }) => {
   const { source } = eventData;
   if (source === emitterSource.LAYOUT_HEADER_QUICK) return;
 
@@ -404,9 +421,15 @@ const clearHistory = async () => {
         --td-chat-loading-circle-border: 2px solid var(--td-brand-color-1);
       }
 
-      :deep(t-chat-item)::part(t-chat__text--user) {
-        background-color: var(--td-chat-item-suggestion-background);
-        color: var(--td-chat-item-suggestion-color);
+      :deep(t-chat-item) {
+        &::part(t-chat__text--user) {
+          background-color: var(--td-chat-item-suggestion-background);
+          color: var(--td-chat-item-suggestion-color);
+        }
+
+        &::part(t-chat-loading__circle) {
+          --td-chat-loading-circle-border-top-color: var(--td-brand-color);
+        }
       }
 
       :deep(.t-divider) {

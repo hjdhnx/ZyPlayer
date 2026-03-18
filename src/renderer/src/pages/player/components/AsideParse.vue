@@ -105,7 +105,7 @@ import { DownloadIcon, HeartFilledIcon, HeartIcon, MoreIcon, SettingIcon, Share1
 import type { ListInstanceFunctions } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import type { PropType } from 'vue';
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, onMounted, ref, toRaw, useTemplateRef, watch } from 'vue';
 
 import { fetchRecBarrage } from '@/api/film';
 import { addHistory, addStar, delStar, findHistory, findStar, putHistory, putStar } from '@/api/moment';
@@ -328,7 +328,7 @@ const handleSwitchParseItem = async (item: IModels['analyze']) => {
   videoData.value = { url: '', playEnd: false, watchTime: 0, duration: 0, skipTimeInStart: 0, skipTimeInEnd: 0 };
 
   await emits('update', {
-    data: Object.assign({}, { info: infoConf.value, extra: { ...extraConf.value, active: item } }),
+    data: toRaw({ info: infoConf.value, extra: { ...extraConf.value, active: item } }),
   });
   setup();
 };
@@ -377,9 +377,6 @@ const onSettingChange = (item) => {
   const { skipTimeInStart = 30, skipTimeInEnd = 30, skipHeadAndEnd, skipAd } = item;
 
   /** sync skip time */
-  historyData.value.skipTimeInStart = skipTimeInStart;
-  historyData.value.skipTimeInEnd = skipTimeInEnd;
-
   videoData.value.skipTimeInStart = skipTimeInStart;
   videoData.value.skipTimeInEnd = skipTimeInEnd;
 

@@ -11,6 +11,7 @@ import { configManager } from '@main/services/ConfigManager';
 import { Schema } from '@main/types/server';
 import { isDev } from '@main/utils/systeminfo';
 import { APP_DESC, APP_NAME, APP_VERSION } from '@shared/config/appinfo';
+import { PORT } from '@shared/config/env';
 import { LOG_MODULE } from '@shared/config/logger';
 import { CacheService } from '@shared/modules/cache';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
@@ -26,7 +27,7 @@ const logger = loggerService.withContext(LOG_MODULE.FASTIFY);
 export class FastifyService {
   private static instance: FastifyService | null = null;
   private server: FastifyInstance | null = null;
-  private PORT: number = 9978;
+  private PORT: number = PORT;
 
   private constructor() {
     // Private constructor to enforce singleton pattern

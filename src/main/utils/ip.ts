@@ -1,22 +1,23 @@
 import { request } from '@main/utils/request';
 import { getIPInfo, isValidIP } from '@shared/modules/ip';
 
-export type IPVersion = 4 | 6 | -1;
+export type IIpVersion = 4 | 6 | -1;
 
-export interface IPInfo {
+export interface IIpInfo {
   ip: string;
-  version: IPVersion;
+  version: IIpVersion;
   valid: boolean;
 }
 
-export interface IPLocation {
+export interface IIpLocation {
   country: string;
   region: string;
   city: string;
   isp: string;
+  isChinaMainland: boolean;
 }
 
-export type IP = IPInfo & { location: Partial<IPLocation> };
+export type IIp = IIpInfo & { location: Partial<IIpLocation> };
 
 /**
  * Get external IP address
@@ -59,7 +60,7 @@ export const getIP = async (preferIPv6: boolean = true): Promise<string> => {
  * @param ip IP address
  * @returns Location information
  */
-export const getLocation = async (ip: string): Promise<Partial<IPLocation>> => {
+export const getLocation = async (ip: string): Promise<Partial<IIpLocation>> => {
   if (!isValidIP(ip)) return {};
 
   try {
@@ -69,11 +70,17 @@ export const getLocation = async (ip: string): Promise<Partial<IPLocation>> => {
       params: { type: 'ip-api', ip },
     });
 
+    const ipData = resp?.data?.ip_data;
+    if (!ipData) return {};
+
+    const country = ipData.country ?? '';
+
     const res = {
-      country: resp?.data?.ip_data?.country ?? '',
-      region: resp?.data?.ip_data?.region ?? '',
-      city: resp?.data?.ip_data?.city ?? '',
-      isp: resp?.data?.ip_data?.isp ?? '',
+      country,
+      region: ipData.region ?? '',
+      city: ipData.city ?? '',
+      isp: ipData.isp ?? '',
+      isChinaMainland: country.toLowerCase() === 'cn',
     };
     return res;
   } catch {
@@ -88,7 +95,7 @@ export const getLocation = async (ip: string): Promise<Partial<IPLocation>> => {
  * @param preferIPv6 Whether to prefer IPv6 address, default is true (prefer IPv6)
  * @returns IP information object
  */
-export const getNetwork = async (preferIPv6: boolean = true): Promise<IP> => {
+export const getNetwork = async (preferIPv6: boolean = true): Promise<IIp> => {
   try {
     const ip = await getIP(preferIPv6);
     if (!ip) {

@@ -137,9 +137,9 @@ export const hash = {
     const srcBuffer = wordParse[inputEncode](src);
     const cipherBuffer = forgeMd['sha512/224']
       .create()
-      .update(forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes())
+      .update(forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes())
       .digest();
-    return forgeStringify[outputEncode](cipherBuffer.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](cipherBuffer.getBytes() as never);
   },
 
   /**
@@ -154,9 +154,9 @@ export const hash = {
     const srcBuffer = wordParse[inputEncode](src);
     const cipherBuffer = forgeMd['sha512/256']
       .create()
-      .update(forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes())
+      .update(forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes())
       .digest();
-    return forgeStringify[outputEncode](cipherBuffer.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](cipherBuffer.getBytes() as never);
   },
 
   /**
@@ -286,10 +286,10 @@ export const hmac = {
     const srcBuffer = wordParse[inputEncode](src);
     const keyBuffer = wordParse[keyEncode](key);
     const hmac = forgeHmac.create();
-    hmac.start('sha512/224', forgeArrayToBytes(wordArrayToArray(keyBuffer)).getBytes());
-    hmac.update(forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes());
+    hmac.start('sha512/224', forgeArrayToBytes(wordArrayToArray(keyBuffer) as unknown as ArrayBuffer).getBytes());
+    hmac.update(forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes());
     const cipherBuffer = hmac.digest();
-    return forgeStringify[outputEncode](cipherBuffer.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](cipherBuffer.getBytes() as never);
   },
 
   /**
@@ -304,10 +304,10 @@ export const hmac = {
     const srcBuffer = wordParse[inputEncode](src);
     const keyBuffer = wordParse[keyEncode](key);
     const hmac = forgeHmac.create();
-    hmac.start('sha512/256', forgeArrayToBytes(wordArrayToArray(keyBuffer)).getBytes());
-    hmac.update(forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes());
+    hmac.start('sha512/256', forgeArrayToBytes(wordArrayToArray(keyBuffer) as unknown as ArrayBuffer).getBytes());
+    hmac.update(forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes());
     const cipherBuffer = hmac.digest();
-    return forgeStringify[outputEncode](cipherBuffer.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](cipherBuffer.getBytes() as never);
   },
 
   /**

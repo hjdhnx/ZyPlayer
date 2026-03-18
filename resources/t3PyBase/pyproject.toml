@@ -9,6 +9,5 @@ dependencies = [
   "pyquery",
   "pycryptodome",
   "requests",
-  "pyzmq",
-  "ujson"
+  "pyzmq"
 ]

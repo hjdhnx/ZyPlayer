@@ -28,26 +28,23 @@ const streamConfig = {
   },
   flv: {
     optional: (headers = {}): Flvjs.Config => {
-      return Object.assign(
-        {
-          // enableWorker: false, // 启用分离线程true会导致无法播放
-          // enableStashBuffer: false, // 关闭IO隐藏缓冲区
-          // stashInitialSize: 128, // 减少首帧显示等待时长
-          // autoCleanupSourceBuffer: true, // 自动清除缓存
-          // reuseRedirectedURL: true, // 允许重定向请求
-          // fixAudioTimestampGap: false, // 音视频同步
-          // deferLoadAfterSourceOpen: false, // 允许延迟加载
-          // referrerPolicy: 'no-referrer', // 不发送来源
-        },
-        Object.keys(headers).length > 0 ? { headers } : {}, // 请求头
-      );
+      return {
+        // enableWorker: false, // 启用分离线程true会导致无法播放
+        // enableStashBuffer: false, // 关闭IO隐藏缓冲区
+        // stashInitialSize: 128, // 减少首帧显示等待时长
+        // autoCleanupSourceBuffer: true, // 自动清除缓存
+        // reuseRedirectedURL: true, // 允许重定向请求
+        // fixAudioTimestampGap: false, // 音视频同步
+        // deferLoadAfterSourceOpen: false, // 允许延迟加载
+        // referrerPolicy: 'no-referrer', // 不发送来源
+        ...(Object.keys(headers).length > 0 ? { headers } : {}),
+      };
     },
   },
   hls: (headers = {}): HlsConfig => {
-    return Object.assign(
-      {},
-      Hlsjs.DefaultConfig,
-      {
+    return {
+      ...Hlsjs.DefaultConfig,
+      ...{
         // Web Worker
         enableWorker: true,
         // MediaSource 仅在不存在的情况下使用ManagedMediaSource
@@ -102,7 +99,7 @@ const streamConfig = {
           },
         },
       },
-      Object.keys(headers).length > 0
+      ...(Object.keys(headers).length > 0
         ? {
             xhrSetup(xhr: XMLHttpRequest, _url: string) {
               // Add custom header. Requires to set up Access-Control-Allow-Headers in your
@@ -113,43 +110,41 @@ const streamConfig = {
               }
             },
           }
-        : {},
-    );
+        : {}),
+    };
   },
   mpegts: {
     optional: (headers = {}): Mpegtsjs.Config => {
-      return Object.assign(
-        {
-          // Web Worker
-          enableWorker: false,
-          // 启用面向Media Source Extensions API的Web Worker
-          // 通过从主线程中分离播放处理，解决了低规格终端受到DOM绘制延迟影响而导致影像播放堵塞的问题。
-          // 在不能使用MSE in Worker的环境中，mpegts.js方面会自动回退，所以基本上设置true
-          // 不过，在 Microsoft Edge for Windows 上，只有启用了 Worker 中的 MSE，H.265 / HEVC 播放才会失效，因此只能在这种情况下禁用。
-          // enableWorkerForMSE: !(
-          //   mediaUtils.isHEVCVideoSupported() && (await Mpegtsjs.supportWorkerForMSEH265Playback()) === false
-          // ),
-          enableWorkerForMSE: false,
-          // 存储 2048KB 缓冲区，直到播放开始
-          // 太大似乎不起作用，但太小或禁用会导致不稳定，尤其是在 Safari 中。
-          enableStashBuffer: true,
-          stashInitialSize: Math.floor(2048 * 1024),
-          // 通过HTMLMediaElement的内部缓冲器追踪实时流的延迟
-          // 与liveBufferLatencyChasing不同，不是突然跳过播放时间，
-          // 通过稍微提高播放速度，在不中断播放的情况下追踪延迟
-          liveSync: true,
-          // 允许的HTMLMediaElement的内部缓冲区的最大值（以秒为单位，3秒）
-          liveSyncMaxLatency: 3,
-          // HTMLMediaElement 的内部缓冲区（延迟）超过 liveSyncMaxLatency 时的目标延迟（秒）。
-          liveSyncTargetLatency: 4.0,
-          // 用于追踪直播延迟的播放速度（x1.1）
-          // 延迟超过3秒时，直到延迟低于playback_buffer_sec为止，播放速度设置为x1.1
-          liveSyncPlaybackRate: 1.1,
-          // 发送来源
-          // referrerPolicy: 'no-referrer',
-        },
-        Object.keys(headers).length > 0 ? { headers } : {},
-      );
+      return {
+        // Web Worker
+        enableWorker: false,
+        // 启用面向Media Source Extensions API的Web Worker
+        // 通过从主线程中分离播放处理，解决了低规格终端受到DOM绘制延迟影响而导致影像播放堵塞的问题。
+        // 在不能使用MSE in Worker的环境中，mpegts.js方面会自动回退，所以基本上设置true
+        // 不过，在 Microsoft Edge for Windows 上，只有启用了 Worker 中的 MSE，H.265 / HEVC 播放才会失效，因此只能在这种情况下禁用。
+        // enableWorkerForMSE: !(
+        //   mediaUtils.isHEVCVideoSupported() && (await Mpegtsjs.supportWorkerForMSEH265Playback()) === false
+        // ),
+        enableWorkerForMSE: false,
+        // 存储 2048KB 缓冲区，直到播放开始
+        // 太大似乎不起作用，但太小或禁用会导致不稳定，尤其是在 Safari 中。
+        enableStashBuffer: true,
+        stashInitialSize: Math.floor(2048 * 1024),
+        // 通过HTMLMediaElement的内部缓冲器追踪实时流的延迟
+        // 与liveBufferLatencyChasing不同，不是突然跳过播放时间，
+        // 通过稍微提高播放速度，在不中断播放的情况下追踪延迟
+        liveSync: true,
+        // 允许的HTMLMediaElement的内部缓冲区的最大值（以秒为单位，3秒）
+        liveSyncMaxLatency: 3,
+        // HTMLMediaElement 的内部缓冲区（延迟）超过 liveSyncMaxLatency 时的目标延迟（秒）。
+        liveSyncTargetLatency: 4.0,
+        // 用于追踪直播延迟的播放速度（x1.1）
+        // 延迟超过3秒时，直到延迟低于playback_buffer_sec为止，播放速度设置为x1.1
+        liveSyncPlaybackRate: 1.1,
+        // 发送来源
+        // referrerPolicy: 'no-referrer',
+        ...(Object.keys(headers).length > 0 ? { headers } : {}),
+      };
     },
   },
   shaka: (_headers = {}) => ({}),
@@ -211,8 +206,8 @@ const streamDecoder = {
       // eslint-disable-next-line ts/no-unused-vars
       const { autoplay = false, isLive = false, optionalConfig = {}, mediaDataSource = {}, headers = {} } = config;
       const flv = Flvjs.createPlayer(
-        Object.assign({ type: 'flv', url }, mediaDataSource),
-        Object.assign({}, streamConfig.flv.optional(headers), optionalConfig),
+        { type: 'flv', url, ...mediaDataSource },
+        { ...streamConfig.flv.optional(headers), ...optionalConfig },
       );
       flv.attachMediaElement(video);
       flv.load();
@@ -229,7 +224,7 @@ const streamDecoder = {
       // eslint-disable-next-line ts/no-unused-vars
       const { autoplay = false, isLive = false, options = {}, headers = {} } = config;
 
-      const hls = new Hlsjs(Object.assign({}, streamConfig.hls(headers), options));
+      const hls = new Hlsjs({ ...streamConfig.hls(headers), ...options });
       hls.loadSource(url);
       hls.attachMedia(video);
       return hls;
@@ -247,15 +242,13 @@ const streamDecoder = {
       const { autoplay = false, isLive = false, mediaDataSource = {}, optionalConfig = {}, headers = {} } = config;
 
       const mpegts = Mpegtsjs.createPlayer(
-        Object.assign(
-          {
-            type: 'mpegts', // mse, mpegts, m2ts, flv, mp4
-            isLive,
-            url,
-          },
-          mediaDataSource,
-        ),
-        Object.assign({}, streamConfig.mpegts.optional(headers), optionalConfig),
+        {
+          type: 'mpegts', // mse, mpegts, m2ts, flv, mp4
+          isLive,
+          url,
+          ...mediaDataSource,
+        },
+        { ...streamConfig.mpegts.optional(headers), ...optionalConfig },
       );
       mpegts.attachMediaElement(video);
       mpegts.load();
@@ -297,7 +290,7 @@ const streamDecoder = {
       // @ts-expect-error declared but its value is never read
       // eslint-disable-next-line ts/no-unused-vars
       const { autoplay = false, isLive = false, options = {}, headers = {} } = config;
-      const client = new WebTorrentjs(Object.assign({}, streamConfig.torrent(headers), options));
+      const client = new WebTorrentjs({ ...streamConfig.torrent(headers), ...options });
       const torrentParsed = magnet.decode(url);
       if (!torrentParsed.tr || torrentParsed.tr.length === 0) {
         const trackers = [

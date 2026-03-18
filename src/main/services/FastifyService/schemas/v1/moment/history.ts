@@ -17,6 +17,8 @@ const baseItemSchema = Type.Object({
   videoIndex: Type.Union([Type.String(), Type.Null()], { description: 'video index' }),
   watchTime: Type.Union([Type.Number({ format: 'float' }), Type.Null()], { description: 'watch time' }),
   duration: Type.Union([Type.Number({ format: 'float' }), Type.Null()], { description: 'video duration' }),
+  skipTimeInEnd: Type.Union([Type.Number({ format: 'float' }), Type.Null()], { description: 'skip time in end' }),
+  skipTimeInStart: Type.Union([Type.Number({ format: 'float' }), Type.Null()], { description: 'skip time in start' }),
   createdAt: Type.Integer({ format: 'int64', description: 'created timestamp' }),
   updatedAt: Type.Integer({ format: 'int64', description: 'updated timestamp' }),
 });

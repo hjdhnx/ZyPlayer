@@ -24,7 +24,7 @@ import { computed, onMounted, ref, useAttrs, useSlots, watch } from 'vue';
 
 import { isMacOS } from '@/utils/systeminfo';
 
-const attrs: Partial<InputProps> = useAttrs();
+const attrs = useAttrs() as InputProps;
 const slots = useSlots();
 
 const inputRef = ref<InstanceType<typeof Input>>();

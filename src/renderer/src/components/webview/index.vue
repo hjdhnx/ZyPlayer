@@ -15,6 +15,7 @@
 </template>
 <script setup lang="ts">
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
+import { isHttp } from '@shared/modules/validate';
 import type {
   DidNavigateEvent,
   DidNavigateInPageEvent,
@@ -28,6 +29,10 @@ import { nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vu
 
 const props = defineProps({
   appid: {
+    type: String,
+    default: '',
+  },
+  src: {
     type: String,
     default: '',
   },
@@ -77,6 +82,8 @@ const setup = () => {
   nextTick(() => attachEventListeners());
 
   window.electron.ipcRenderer.on(IPC_CHANNEL.WEBVIEW_LINK_BLOCK_RELAY, onUriBlocked);
+
+  if (isHttp(props.src)) loadUrl(props.src);
 };
 
 const dispose = () => {

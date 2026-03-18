@@ -1,4 +1,4 @@
-import { isPositiveFiniteNumber } from '@shared/modules/validate';
+import { isPositiveFiniteNumber } from './validate';
 
 export type ISizeUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB';
 

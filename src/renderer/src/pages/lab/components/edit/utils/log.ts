@@ -17,7 +17,7 @@ const parseLog = (chunk: string) => {
 };
 
 const emitLog = (logger: ILogger, timestamp: number, level: ITerminalLog, message: string) => {
-  logger('logger', `<Logger>${toHMS(timestamp)} > `, level, message);
+  logger('logger', toHMS(timestamp), level, message);
 };
 
 const createSystemSseTransport = async (logger: ILogger, type: ISiteType) => {

@@ -34,6 +34,9 @@ export const ipSchema = {
   tags: [API_PREFIX],
   summary: 'Get server ip',
   description: 'Server ip address.',
+  querystring: Type.Object({
+    preferIPv6: Type.Optional(Type.Boolean({ description: 'Whether to prefer IPv6 address, default is true' })),
+  }),
   response: {
     200: createHttpSuccessResponseSchema(
       Type.Object({
@@ -47,6 +50,7 @@ export const ipSchema = {
           region: Type.Optional(Type.String({ description: 'region' })),
           city: Type.Optional(Type.String({ description: 'city' })),
           isp: Type.Optional(Type.String({ description: 'isp' })),
+          isChinaMainland: Type.Optional(Type.Boolean({ description: 'valid location in china mainland' })),
         }),
       }),
       { description: 'Successful Operation' },

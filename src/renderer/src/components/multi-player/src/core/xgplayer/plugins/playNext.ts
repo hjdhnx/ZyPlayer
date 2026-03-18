@@ -53,7 +53,7 @@ export default class PlayNextIcon extends Plugin {
   }
 
   playNext() {
-    emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT);
+    emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, {});
   }
 
   destroy() {

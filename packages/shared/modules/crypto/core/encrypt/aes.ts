@@ -39,7 +39,7 @@ const getPad = (pad: string): Pad => {
 /**
  * 获取加密模式
  */
-const getMode = (mode: string) => {
+const getMode = (mode: string): cipher.Algorithm => {
   switch (mode.toLowerCase()) {
     case 'cfb':
       return 'AES-CFB';
@@ -113,20 +113,25 @@ export const aes = {
     if (![16, 24, 32].includes(keyBuffer.sigBytes)) {
       throw new Error('Key must be 128, 192, or 256 bytes');
     }
-    if (!['ecb', 'gcm'].includes(mode.toLowerCase()) && ivBuffer.sigBytes !== 16) {
+    if (!['ecb', 'gcm'].includes(mode.toLowerCase()) && ivBuffer!.sigBytes !== 16) {
       throw new Error('IV must be 128 bytes');
     }
 
     const srcBuffer = wordArrayParse[inputEncode](src);
     const aadBuffer = mode.toLowerCase() === 'gcm' && aad ? wordArrayParse[aadEncode](aad) : undefined;
 
-    const encipher = cipher.createCipher(getMode(mode), forgeArrayToBytes(wordArrayToArray(keyBuffer)));
+    const encipher = cipher.createCipher(
+      getMode(mode),
+      forgeArrayToBytes(wordArrayToArray(keyBuffer) as unknown as ArrayBuffer),
+    );
     encipher.start({
-      iv: ivBuffer ? forgeArrayToBytes(wordArrayToArray(ivBuffer)) : undefined,
-      additionalData: aadBuffer ? forgeArrayToBytes(wordArrayToArray(aadBuffer)) : undefined,
+      iv: ivBuffer ? forgeArrayToBytes(wordArrayToArray(ivBuffer) as unknown as ArrayBuffer) : undefined,
+      additionalData: aadBuffer
+        ? (forgeArrayToBytes(wordArrayToArray(aadBuffer) as unknown as ArrayBuffer) as unknown as string)
+        : undefined,
     });
     const paddedData = ['cbc', 'ecb'].includes(mode.toLowerCase())
-      ? wordArrayPad[getPad(pad)](srcBuffer, 4)
+      ? wordArrayPad[getPad(pad) as keyof typeof wordArrayPad](srcBuffer, 4)
       : srcBuffer;
 
     if (
@@ -137,19 +142,20 @@ export const aes = {
       throw new Error('Message must be multipler of 128 bits');
     }
 
+    // @ts-expect-error private property
     encipher.mode.pad = false;
-    encipher.update(forgeArrayToBytes(wordArrayToArray(paddedData)));
+    encipher.update(forgeArrayToBytes(wordArrayToArray(paddedData) as unknown as ArrayBuffer));
     encipher.finish();
     const encrypted = encipher.output;
 
     // GCM模式需要返回标签
     if (mode.toLowerCase() === 'gcm') {
-      const encryptedData = forgeStringify[outputEncode](encrypted.getBytes());
-      const tag = forgeStringify[tagEncode](encipher.mode.tag);
+      const encryptedData = forgeStringify[outputEncode as keyof typeof forgeStringify](encrypted.getBytes() as never);
+      const tag = forgeStringify[tagEncode as keyof typeof forgeStringify](encipher.mode.tag as never);
       return `${encryptedData}\nTag:${tag}`;
     }
 
-    return forgeStringify[outputEncode](encrypted.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](encrypted.getBytes() as never);
   },
 
   /**
@@ -204,7 +210,7 @@ export const aes = {
     if (![16, 24, 32].includes(keyBuffer.sigBytes)) {
       throw new Error('Key must be 128, 192, or 256 bytes');
     }
-    if (!['ecb', 'gcm'].includes(mode.toLowerCase()) && ivBuffer.sigBytes !== 16) {
+    if (!['ecb', 'gcm'].includes(mode.toLowerCase()) && ivBuffer!.sigBytes !== 16) {
       throw new Error('IV must be 128 bytes');
     }
 
@@ -212,20 +218,29 @@ export const aes = {
     const aadBuffer = mode.toLowerCase() === 'gcm' && aad ? wordArrayParse[aadEncode](aad) : undefined;
     const tagBuffer = mode.toLowerCase() === 'gcm' && tag ? wordArrayParse[tagEncode](tag) : undefined;
 
-    const decipher = cipher.createDecipher(getMode(mode), forgeArrayToBytes(wordArrayToArray(keyBuffer)));
+    const decipher = cipher.createDecipher(
+      getMode(mode),
+      forgeArrayToBytes(wordArrayToArray(keyBuffer) as unknown as ArrayBuffer),
+    );
     decipher.start({
-      iv: ivBuffer ? forgeArrayToBytes(wordArrayToArray(ivBuffer)) : undefined,
-      additionalData: aadBuffer ? forgeArrayToBytes(wordArrayToArray(aadBuffer)) : undefined,
-      tag: tagBuffer ? forgeArrayToBytes(wordArrayToArray(tagBuffer)) : undefined,
+      iv: ivBuffer ? forgeArrayToBytes(wordArrayToArray(ivBuffer) as unknown as ArrayBuffer) : undefined,
+      additionalData: aadBuffer
+        ? (forgeArrayToBytes(wordArrayToArray(aadBuffer) as unknown as ArrayBuffer) as unknown as string)
+        : undefined,
+      tag: tagBuffer ? forgeArrayToBytes(wordArrayToArray(tagBuffer) as unknown as ArrayBuffer) : undefined,
     });
+
+    // @ts-expect-error private property
     decipher.mode.unpad = false;
-    decipher.update(forgeArrayToBytes(wordArrayToArray(srcBuffer)));
+    decipher.update(forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer));
     decipher.finish();
     const decrypted = decipher.output;
 
-    const unpaddedBuffer = wordArrayUnpad[getPad(pad)](arrayToWordArray(forgeBytesToArray(decrypted)));
-    const unpaddedBytes = forgeArrayToBytes(wordArrayToArray(unpaddedBuffer));
+    const unpaddedBuffer = wordArrayUnpad[getPad(pad) as keyof typeof wordArrayPad](
+      arrayToWordArray(forgeBytesToArray(decrypted)),
+    );
+    const unpaddedBytes = forgeArrayToBytes(wordArrayToArray(unpaddedBuffer) as unknown as ArrayBuffer);
 
-    return forgeStringify[outputEncode](unpaddedBytes.getBytes());
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](unpaddedBytes.getBytes() as never);
   },
 };

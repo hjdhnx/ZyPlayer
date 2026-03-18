@@ -5,4 +5,3 @@ pyquery
 pycryptodome
 requests
 pyzmq
-ujson

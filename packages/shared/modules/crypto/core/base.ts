@@ -1,7 +1,8 @@
-import { toString } from '@shared/modules/toString';
-import { isPositiveFiniteNumber, isUUID } from '@shared/modules/validate';
 import type { UUIDTypes } from 'uuid';
 import { v3 as uuidv3, v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+
+import { toString } from '../../toString';
+import { isPositiveFiniteNumber, isUUID } from '../../validate';
 
 /**
  * Generate a random version 4 UUID
@@ -40,7 +41,7 @@ export const randomNanoid = (len?: number): string => {
 
   let id = '';
   for (let i = 0; i < len!; i++) {
-    id += URL_ALPHABET[63 & bytes[i]];
+    id += URL_ALPHABET[63 & bytes[i]]!;
   }
 
   return id;

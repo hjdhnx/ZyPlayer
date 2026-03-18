@@ -178,13 +178,11 @@ const handleReset = () => {
 const uploadFileEvent = async () => {
   try {
     const resp = await window.electron.ipcRenderer.invoke(IPC_CHANNEL.FILE_SELECT_FILE_DIALOG, {
-      config: {
-        filters: [
-          { name: 'M3u Files', extensions: ['m3u', 'm3u8', 'ts'] },
-          { name: 'Text Files', extensions: ['txt'] },
-          { name: 'All Files', extensions: ['*'] },
-        ],
-      },
+      filters: [
+        { name: 'M3u Files', extensions: ['m3u', 'm3u8', 'ts'] },
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
     });
     if (!isArray(resp) || isArrayEmpty(resp)) {
       MessagePlugin.warning(t('common.fail'));

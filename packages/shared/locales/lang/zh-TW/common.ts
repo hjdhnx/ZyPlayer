@@ -96,6 +96,7 @@ export default {
   log: '日誌',
   cache: '緩存',
   support: '支持',
+  unSupport: '不支持',
   scan: '掃描',
   space: '空格',
   data: '數據',

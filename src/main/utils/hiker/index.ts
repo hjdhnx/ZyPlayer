@@ -1,7 +1,6 @@
-import * as htmlParser from './htmlParser';
-import jinja from './jinja';
-import * as request from './request';
 import * as ruleParse from './ruleParse';
-import * as ua from './ua';
+import * as similarity from './similarity';
 
-export { htmlParser, jinja, request, ruleParse, ua };
+export { ruleParse, similarity };
+
+export * from './inject';

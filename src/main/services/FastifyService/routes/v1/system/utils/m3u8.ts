@@ -117,17 +117,14 @@ export const fixAdM3u8Ai = async (m3u8Url: string, headers: Record<string, strin
   const firstLen = firstSegment.length;
   const middleLen = Math.round(lines.length / 2).toString().length;
 
-  const lastSegment = lines
-    .slice()
-    .reverse()
-    .find((line: string) => {
-      if (!line.startsWith('#')) {
-        const revMatch = commonPrefixLength(reverseString(firstSegment), reverseString(line));
-        maxPrefixLen = commonPrefixLength(firstSegment, line);
-        return firstLen - maxPrefixLen <= middleLen + revMatch || maxPrefixLen > 10;
-      }
-      return false;
-    });
+  const lastSegment = lines.toReversed().find((line: string) => {
+    if (!line.startsWith('#')) {
+      const revMatch = commonPrefixLength(reverseString(firstSegment), reverseString(line));
+      maxPrefixLen = commonPrefixLength(firstSegment, line);
+      return firstLen - maxPrefixLen <= middleLen + revMatch || maxPrefixLen > 10;
+    }
+    return false;
+  });
   logger.info(`最后一条切片：${lastSegment}`);
 
   // 移除广告 URL

@@ -23,7 +23,7 @@ const playNextPlugin = {
   tooltip: lang(),
   disable: true,
   click() {
-    emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT);
+    emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, {});
   },
   mounted() {},
 };

@@ -2,7 +2,9 @@ import { APP_DATABASE_PATH } from '@main/utils/path';
 import { generateUserAgent } from '@main/utils/systeminfo';
 import { PROXY_TYPE } from '@shared/config/setting';
 import type { ITheme } from '@shared/config/theme';
+import { THEME } from '@shared/config/theme';
 import type { ILang } from '@shared/locales';
+import { isHttp, isPositiveFiniteNumber, isValidUa } from '@shared/modules/validate';
 import type { ProxyConfig } from 'electron';
 import Store from 'electron-store';
 
@@ -33,7 +35,8 @@ export class ConfigManager {
   }
 
   public get theme(): ITheme {
-    return this.get(IStore.THEME, 'system');
+    const val = this.get(IStore.THEME, 'system');
+    return ([THEME.LIGHT, THEME.DARK, THEME.SYSTEM] as ITheme[]).includes(val) ? val : 'system';
   }
 
   public get lang(): ILang {
@@ -41,27 +44,31 @@ export class ConfigManager {
   }
 
   public get zoom(): number {
-    return this.get(IStore.ZOOM, 1);
+    const val = this.get(IStore.ZOOM, 1);
+    return isPositiveFiniteNumber(val) ? val : 1;
   }
 
   public get dns(): string {
-    return this.get(IStore.DNS);
+    const val = this.get(IStore.DNS, '');
+    return isHttp(val, true) ? val : '';
   }
 
   public get hardwareAcceleration(): boolean {
-    return this.get(IStore.HARDWARE_ACCELERATION, true);
+    return !!this.get(IStore.HARDWARE_ACCELERATION, true);
   }
 
   public get timeout(): number {
-    return this.get(IStore.TIMEOUT, 10 * 1000);
+    const val = this.get(IStore.TIMEOUT, 10 * 1000);
+    return isPositiveFiniteNumber(val) ? val : 10 * 1000;
   }
 
   public get ua(): string {
-    return this.get(IStore.UA, generateUserAgent());
+    const val = this.get(IStore.UA, generateUserAgent());
+    return isValidUa(val) ? val : generateUserAgent();
   }
 
   public get debug(): boolean {
-    return this.get(IStore.DEBUG, false);
+    return !!this.get(IStore.DEBUG, false);
   }
 
   public get proxy(): ProxyConfig {

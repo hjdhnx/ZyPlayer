@@ -135,7 +135,7 @@ export async function matchPs(keyword: string): Promise<number[]> {
       .map((line) => (/^\d+$/.test(line) ? Number.parseInt(line) : null))
       .filter((pid): pid is number => pid !== null);
 
-    const equalPids = Array.from(new Set(pids));
+    const equalPids = [...new Set(pids)];
     logger.debug(`Matched PIDs: ${equalPids.join(', ')}`);
 
     return equalPids;
@@ -169,7 +169,7 @@ export function matchPsSync(keyword: string): number[] {
       .map((line) => (/^\d+$/.test(line) ? Number.parseInt(line) : null))
       .filter((pid): pid is number => pid !== null);
 
-    const equalPids = Array.from(new Set(pids));
+    const equalPids = [...new Set(pids)];
     logger.debug(`Matched PIDs: ${equalPids.join(', ')}`);
 
     return equalPids;
@@ -203,7 +203,7 @@ export async function matchPort(port: number): Promise<number[]> {
       .map((line) => (/^\d+$/.test(line) ? Number.parseInt(line) : null))
       .filter((pid): pid is number => pid !== null);
 
-    const equalPids = Array.from(new Set(pids));
+    const equalPids = [...new Set(pids)];
     logger.debug(`Matched PIDs: ${equalPids.join(', ')}`);
 
     return equalPids;
@@ -237,7 +237,7 @@ export function matchPortSync(port: number): number[] {
       .map((line) => (/^\d+$/.test(line) ? Number.parseInt(line) : null))
       .filter((pid): pid is number => pid !== null);
 
-    const equalPids = Array.from(new Set(pids));
+    const equalPids = [...new Set(pids)];
     logger.debug(`Matched PIDs: ${equalPids.join(', ')}`);
 
     return equalPids;

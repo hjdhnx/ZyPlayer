@@ -8,7 +8,7 @@
       </div>
 
       <div class="nav-sub-content">
-        <t-list ref="listRef" class="list-wrap" :scroll="{ rowHeight: 35, threshold: 15, type: 'virtual' }">
+        <t-list ref="listRef" class="list-wrap" :scroll="{ rowHeight: 34, threshold: 15, type: 'virtual' }">
           <t-list-item
             v-for="(item, index) in listData"
             :key="index"
@@ -30,7 +30,8 @@
           </t-list-item>
         </t-list>
       </div>
-      <div class="nav-sub-footer">
+
+      <div v-if="$slots.bottom" class="nav-sub-footer">
         <slot name="bottom"></slot>
       </div>
     </div>
@@ -71,11 +72,11 @@ const props = defineProps({
 
 const emit = defineEmits(['change']);
 
-import { isStrEmpty, isString } from '@shared/modules/validate';
+import { isNil, isStrEmpty, isString } from '@shared/modules/validate';
 import Fuse from 'fuse.js';
 import { CaretLeftSmallIcon, CaretRightSmallIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { ListInstanceFunctions } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { onActivated, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const listRef = useTemplateRef<ListInstanceFunctions>('listRef');
 
@@ -86,9 +87,10 @@ const searchValue = ref<string>('');
 const active = ref({
   search: false,
   show: true,
+  index: -1,
 });
 const width = ref<number>(114);
-const fuse = ref();
+const fuse = ref<Fuse<{ id: string; name: string }> | null>(null);
 
 watch(
   () => props.active,
@@ -105,22 +107,34 @@ watch(
     fuseCollection();
     handleScroll();
   },
+  { deep: true },
 );
 
-onActivated(() => handleScroll());
+onMounted(() => setup());
+onActivated(() => activeSetup());
+onDeactivated(() => deactivateDispose());
 
-onMounted(() => {
+const setup = () => {
   fuseCollection();
   handleScroll();
-});
+};
+
+const activeSetup = () => {
+  handleListFilter();
+  handleScroll();
+};
+
+const deactivateDispose = () => {
+  active.value.index = -1;
+};
 
 const fuseCollection = () => {
   const list = listData.value || [];
 
-  if (fuse.value) {
-    fuse.value.setCollection(list);
-  } else {
+  if (isNil(fuse.value)) {
     fuse.value = new Fuse(list, { keys: ['name'], useExtendedSearch: true });
+  } else {
+    fuse.value.setCollection(list);
   }
 };
 
@@ -135,8 +149,14 @@ const handleItemClick = (key: string | number) => {
 };
 
 const handleListFilter = () => {
-  const kw = searchValue.value?.trim() || '';
-  listData.value = isString(kw) && !isStrEmpty(kw) ? fuse.value.search(`'${kw}`).map((item) => item.item) : props.list;
+  const kw = searchValue.value;
+  const isSearchKw = isString(kw) && !isStrEmpty(kw);
+
+  listData.value =
+    isSearchKw && !isNil(fuse.value) ? fuse.value!.search(String(kw)).map((item) => item.item) : props.list;
+
+  if (!isSearchKw) active.value.index = -1;
+  handleScroll();
 };
 
 const handleScroll = () => {
@@ -150,6 +170,8 @@ const handleScroll = () => {
 
   const index = list.findIndex((item) => item.id === id) - 1;
   if (index < 0) return;
+  if (active.value.index === index) return;
+  active.value.index = index;
 
   listRef.value?.scrollTo?.({
     index,
@@ -201,7 +223,6 @@ const handleScroll = () => {
           height: calc(var(--td-comp-size-m) + 2px);
           padding: 0;
           cursor: pointer;
-          margin-bottom: 1px;
 
           &::after {
             content: none;

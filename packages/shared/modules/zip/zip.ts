@@ -1,9 +1,10 @@
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-import { isStrEmpty, isString } from '@shared/modules/validate';
 import AdmZip from 'adm-zip';
 import StreamZip from 'node-stream-zip';
+
+import { isStrEmpty, isString } from '../validate';
 
 async function addDirectoryToZip(zip: AdmZip, dirPath: string, rootPath: string): Promise<void> {
   const entries = await readdir(dirPath);

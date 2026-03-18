@@ -1,12 +1,6 @@
 <template>
   <div class="analyze view-container">
-    <common-nav
-      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
-      :active="active.nav"
-      search
-      class="sidebar"
-      @change="onNavChange"
-    />
+    <common-nav :list="navList" :active="active.nav" search class="sidebar" @change="onNavChange" />
 
     <div class="content">
       <div class="header">
@@ -81,7 +75,7 @@ import CommonNav from '@/components/common-nav/index.vue';
 import WebviewView from '@/components/webview/index.vue';
 import { emitterChannel, emitterSource } from '@/config/emitterChannel';
 import { attachContent } from '@/config/global';
-import { china as CN_PLATFORM, outher as OUTHER_PLATFORM } from '@/config/parse';
+import { china as CN_PLATFORM, other as OTHER_PLATFORM } from '@/config/parse';
 import { t } from '@/locales';
 import { usePlayerStore, useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
@@ -99,8 +93,6 @@ const searchValue = ref('');
 const currentUrl = ref('about:blank');
 const webviewRef = ref<typeof WebviewView | null>(null);
 
-const platform = computed(() => (storeSetting.isChinaMainland ? CN_PLATFORM : OUTHER_PLATFORM));
-
 const config = ref({
   default: {} as IModels['analyze'],
   list: [] as IModels['analyze'][],
@@ -112,6 +104,9 @@ const active = ref({
   nav: '',
   loading: false,
 });
+
+const navList = computed(() => config.value.list.map((t) => ({ id: t.id, name: t.name })));
+const platform = computed(() => (storeSetting.isCHS ? CN_PLATFORM : OTHER_PLATFORM));
 
 onMounted(() => {
   getSetting();
@@ -287,7 +282,7 @@ const defaultConfig = () => {
   config.value.default = {} as IModels['analyze'];
 };
 
-const reloadConfig = async (eventData: { source: string; data: any }) => {
+const reloadConfig = async ({ data: eventData }) => {
   const { source } = eventData;
   if (source === emitterSource.PAGE_SHOW) return;
 
@@ -305,7 +300,7 @@ const onNavChange = async (id: string) => {
   }
 };
 
-const onSearchRecommend = (eventData: { source: string; data: any }) => {
+const onSearchRecommend = ({ data: eventData }) => {
   const { source, data: kw } = eventData;
   if (source === emitterSource.PAGE_SHOW) return;
 

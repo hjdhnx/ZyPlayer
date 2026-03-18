@@ -1,23 +1,7 @@
 import { request } from '@main/utils/request';
 import { base64 } from '@shared/modules/crypto';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import { isJson } from '@shared/modules/validate';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 
 class T4ServerAdapter {
   private api: string = '';
@@ -30,9 +14,9 @@ class T4ServerAdapter {
     this.categories = source.categories;
   }
 
-  async init(): Promise<ICmsInit> {}
+  async init(): ICmsResultPromise['init'] {}
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const { data: resp } = await request.request({
       url: this.api,
       method: 'GET',
@@ -65,7 +49,7 @@ class T4ServerAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const { data: resp } = await request.request({
       url: this.api,
       method: 'GET',
@@ -91,7 +75,7 @@ class T4ServerAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { page = 1, tid, extend = {} } = doc || {};
     const extendStr = JSON.stringify(extend);
 
@@ -126,7 +110,7 @@ class T4ServerAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const idsArray = [ids];
 
@@ -166,7 +150,7 @@ class T4ServerAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
 
     const { data: resp } = await request.request({
@@ -194,7 +178,7 @@ class T4ServerAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc || {};
 
     const { data: resp } = await request.request({
@@ -225,11 +209,24 @@ class T4ServerAdapter {
     return res;
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async action(doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    const { action, value: rawValue, timeout } = doc || {};
+    const value = isJson(rawValue) ? JSON.stringify(rawValue) : rawValue;
+    const { data: resp } = await request.request({
+      url: this.api,
+      method: 'GET',
+      params: { ac: 'action', action, value },
+      ...(timeout && timeout > 0 ? { timeout } : {}),
+    });
+
+    return resp;
+  }
+
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 }

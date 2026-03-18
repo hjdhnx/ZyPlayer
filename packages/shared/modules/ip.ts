@@ -1,5 +1,6 @@
-import { isStrEmpty } from '@shared/modules/validate';
 import ipaddr from 'ipaddr.js';
+
+import { isStrEmpty } from './validate';
 
 export type IPVersion = 4 | 6 | -1;
 

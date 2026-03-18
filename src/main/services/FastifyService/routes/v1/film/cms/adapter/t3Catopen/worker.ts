@@ -99,6 +99,14 @@ const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> 
     return res;
   },
 
+  async action(options) {
+    const { action, value, timeout } = options!;
+    if (timeout && timeout > 0) globalThis.variable = { timeout };
+    else delete globalThis.variable?.timeout;
+    const resp = await spider.action(action, value);
+    return resp;
+  },
+
   async proxy(options) {
     const resp = await spider.proxy(options);
     const res = isJsonStr(resp) ? JSON.parse(resp) : resp;
@@ -107,9 +115,14 @@ const handlers: Record<string, (options?: Record<string, any>) => Promise<any>> 
 };
 
 const main = async (type: string, options?: Record<string, any>) => {
-  const handler = handlers[type];
-  if (isNil(handler)) throw new Error(`Handler not found for type: ${type}`);
-  return await handler(options);
+  try {
+    const handler = handlers[type];
+    if (isNil(handler)) throw new Error(`Handler not found for type: ${type}`);
+    return await handler(options);
+  } catch (error) {
+    console.error((error as Error).message);
+    throw error;
+  }
 };
 
 workerpool.worker({ main });

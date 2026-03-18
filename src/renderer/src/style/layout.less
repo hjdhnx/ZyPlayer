@@ -218,26 +218,29 @@
   }
 }
 
-// [platform='darwin'] {
-//   .layout {
-//     :deep(.@{starter-prefix}) {
-//       &-aside {
-//         background: var(--td-bg-lowest-mac);
-//         backdrop-filter: blur(18px);
+[platform='darwin'],
+[platform='win32'] {
+  .layout {
+    background: var(--td-mica-background);
 
-//         &-container {
-//           .t-default-menu {
-//             .t-menu__item {
-//               &:hover:not(.t-is-active):not(.t-is-opened):not(.t-is-disabled) {
-//                 background: var(--td-bg-midst-mac);
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
+    :deep(.@{starter-prefix}) {
+      &-aside {
+        background: transparent;
+        backdrop-filter: blur(18px);
+
+        &-container {
+          .t-default-menu {
+            .t-menu__item {
+              &:hover:not(.t-is-active):not(.t-is-opened):not(.t-is-disabled) {
+                background: var(--td-mica-surface-2);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 [fullscreen='true'][platform='darwin'] {
   .layout {

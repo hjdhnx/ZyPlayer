@@ -403,7 +403,7 @@ const togglePlayEvent = () => {
   mseRef.value.togglePlay();
 };
 
-emitter.on(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, () => {
+emitter.on(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, ({ data: _eventData }) => {
   MessagePlugin.info('播放下集事件触发');
 });
 </script>

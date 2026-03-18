@@ -15,6 +15,8 @@ export default {
     notSelectSourceBeforeSearch: '未选择数据源或本站模式数据源搜索状态为关闭',
     noEffectiveSearchSource: '无有效搜索数据源, 请检查数据源搜索配置和搜索模式',
     noDetailInfo: '详情数据缺失或错误',
+    noSiteInfo: '关联数据源查找失败',
+    noSupportAction: '当前操作不支持',
   },
   field: {
     name: '名称',

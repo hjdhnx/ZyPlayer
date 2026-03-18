@@ -38,6 +38,9 @@ export default class AppUpdater {
     autoUpdater.logger = logger as Logger;
     autoUpdater.forceDevUpdateConfig = !isPackaged;
     autoUpdater.autoDownload = false; // Disable auto-download
+    // Never auto-install on quit - user must explicitly click "Install Now"
+    // Auto-install on quit can cause issues: unexpected updates on restart,
+    // corruption if system shuts down during install, or app uninstall on force shutdown
     autoUpdater.autoInstallOnAppQuit = false; // Disable auto-install on app quit
     autoUpdater.disableDifferentialDownload = true; // Disable differential updates
     autoUpdater.requestHeaders = {
@@ -82,7 +85,8 @@ export default class AppUpdater {
 
   public setAutoUpdate(isActive: boolean) {
     autoUpdater.autoDownload = isActive;
-    autoUpdater.autoInstallOnAppQuit = isActive;
+    // autoInstallOnAppQuit is always false - user must explicitly click "Install Now"
+    // autoUpdater.autoInstallOnAppQuit = isActive;
   }
 
   public cancelDownload() {
@@ -144,7 +148,7 @@ export default class AppUpdater {
     }
 
     app.isQuitting = true;
-    setImmediate(() => this.autoUpdater.quitAndInstall());
+    setImmediate(() => autoUpdater.quitAndInstall(true, true));
   }
 
   public startDownload() {

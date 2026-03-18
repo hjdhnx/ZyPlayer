@@ -83,7 +83,7 @@ export const wordArrayToArray = (wordArray: CryptoJS.lib.WordArray): Uint8Array 
   const sigBytes = wordArray.sigBytes;
   const result = new Uint8Array(sigBytes);
   for (let i = 0; i < sigBytes; i++) {
-    result[i] = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+    result[i] = (words[i >>> 2]! >>> (24 - (i % 4) * 8)) & 0xff;
   }
   return result;
 };
@@ -92,7 +92,7 @@ export const arrayToWordArray = (array: Uint8Array): CryptoJS.lib.WordArray => {
   const words: number[] = [];
   const len = array.length;
   for (let i = 0; i < len; i++) {
-    words[i >>> 2] |= (array[i] & 0xff) << (24 - (i % 4) * 8);
+    words[i >>> 2]! |= (array[i]! & 0xff) << (24 - (i % 4) * 8);
   }
   return CryptoJS.lib.WordArray.create(words, len);
 };

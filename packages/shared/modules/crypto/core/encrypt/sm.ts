@@ -86,10 +86,10 @@ export const sm4 = {
       throw new Error('IV is required in CBC/CFB/OFB/CTR mode');
     }
 
-    const keyBuffer = wordParse[keyEncode](key);
-    const ivBuffer = mode.toLowerCase() !== 'ecb' ? wordParse[ivEncode](iv) : undefined;
+    const keyBuffer = wordParse[keyEncode as keyof typeof wordParse](key);
+    const ivBuffer = mode.toLowerCase() !== 'ecb' ? wordParse[ivEncode as keyof typeof wordParse](iv!) : undefined;
     const aadBuffer = mode.toLowerCase() === 'gcm' && aad ? wordParse[aadEncode](aad) : undefined;
-    const srcBuffer = wordParse[inputEncode](src);
+    const srcBuffer = wordParse[inputEncode as keyof typeof wordParse](src);
 
     if (keyBuffer.sigBytes !== 16) throw new Error('Key must be 128 bytes');
     if (mode !== 'ecb' && ivBuffer!.sigBytes !== 16) throw new Error('IV must be 128 bytes');
@@ -101,20 +101,14 @@ export const sm4 = {
       throw new Error('Message must be multipler of 128 bits');
     }
 
-    const encrypted = SmCrypto.sm4.encrypt(
-      wordArrayToArray(srcBuffer),
-      wordArrayToArray(keyBuffer),
-      Object.assign(
-        {
-          mode: getMode(mode),
-          padding: mode.toLowerCase() !== 'gcm' ? getPad(pad) : 'none',
-          output: 'array',
-        },
-        ivBuffer !== undefined ? { iv: wordArrayToArray(ivBuffer) } : {},
-        mode.toLowerCase() === 'gcm' && aadBuffer ? { associatedData: wordArrayToArray(aadBuffer) } : {},
-        mode.toLowerCase() === 'gcm' ? { outputTag: true } : {},
-      ) as any,
-    );
+    const encrypted = SmCrypto.sm4.encrypt(wordArrayToArray(srcBuffer), wordArrayToArray(keyBuffer), {
+      mode: getMode(mode),
+      padding: mode.toLowerCase() !== 'gcm' ? getPad(pad) : 'none',
+      output: 'array',
+      ...(ivBuffer !== undefined ? { iv: wordArrayToArray(ivBuffer) } : {}),
+      ...(mode.toLowerCase() === 'gcm' && aadBuffer ? { associatedData: wordArrayToArray(aadBuffer) } : {}),
+      ...(mode.toLowerCase() === 'gcm' ? { outputTag: true } : {}),
+    } as any);
 
     if (mode.toLowerCase() === 'gcm') {
       const gcmResult = encrypted as IGCMResult;
@@ -174,29 +168,23 @@ export const sm4 = {
       throw new Error('IV is required in CBC/CFB/OFB/CTR mode');
     }
 
-    const keyBuffer = wordParse[keyEncode](key);
-    const ivBuffer = mode.toLowerCase() !== 'ecb' ? wordParse[ivEncode](iv) : undefined;
+    const keyBuffer = wordParse[keyEncode as keyof typeof wordParse](key);
+    const ivBuffer = mode.toLowerCase() !== 'ecb' ? wordParse[ivEncode as keyof typeof wordParse](iv!) : undefined;
     const aadBuffer = mode.toLowerCase() === 'gcm' && aad ? wordParse[aadEncode](aad) : undefined;
     const tagBuffer = mode.toLowerCase() === 'gcm' && tag ? wordParse[tagEncode](tag) : undefined;
-    const srcBuffer = wordParse[inputEncode](src);
+    const srcBuffer = wordParse[inputEncode as keyof typeof wordParse](src);
 
     if (keyBuffer.sigBytes !== 16) throw new Error('Key must be 128 bytes');
     if (mode !== 'ecb' && ivBuffer!.sigBytes !== 16) throw new Error('IV must be 128 bytes');
 
-    const decrypted = SmCrypto.sm4.decrypt(
-      wordArrayToArray(srcBuffer),
-      wordArrayToArray(keyBuffer),
-      Object.assign(
-        {
-          mode: getMode(mode),
-          padding: mode.toLowerCase() !== 'gcm' ? getPad(pad) : 'none',
-          output: 'array',
-        },
-        ivBuffer !== undefined ? { iv: wordArrayToArray(ivBuffer) } : {},
-        mode.toLowerCase() === 'gcm' && aadBuffer ? { associatedData: wordArrayToArray(aadBuffer) } : {},
-        mode.toLowerCase() === 'gcm' && tagBuffer ? { tag: wordArrayToArray(tagBuffer) } : {},
-      ) as any,
-    );
+    const decrypted = SmCrypto.sm4.decrypt(wordArrayToArray(srcBuffer), wordArrayToArray(keyBuffer), {
+      mode: getMode(mode),
+      padding: mode.toLowerCase() !== 'gcm' ? getPad(pad) : 'none',
+      output: 'array',
+      ...(ivBuffer !== undefined ? { iv: wordArrayToArray(ivBuffer) } : {}),
+      ...(mode.toLowerCase() === 'gcm' && aadBuffer ? { associatedData: wordArrayToArray(aadBuffer) } : {}),
+      ...(mode.toLowerCase() === 'gcm' && tagBuffer ? { tag: wordArrayToArray(tagBuffer) } : {}),
+    } as any);
 
     return wordStringify[outputEncode](arrayToWordArray(decrypted as unknown as Uint8Array));
   },

@@ -1,17 +1,17 @@
 import { join } from 'node:path';
-import url from 'node:url';
 
 import { loggerService } from '@logger';
 import { appLocale } from '@main/services/AppLocale';
 import { configManager } from '@main/services/ConfigManager';
 import { APP_DATABASE_PATH, APP_FILE_PATH } from '@main/utils/path';
-import { isDev, isLinux, isMacOS, isPackaged, isWindows } from '@main/utils/systeminfo';
+import { isDev, isLinux, isMacOS, isMacOSTahoe, isPackaged, isWindows, isWindows22H2 } from '@main/utils/systeminfo';
 import { titleBarOverlayDark, titleBarOverlayLight } from '@shared/config/appinfo';
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
 import { LOG_MODULE } from '@shared/config/logger';
-import { WINDOW_NAME } from '@shared/config/windowName';
+import type { ISize } from '@shared/config/window';
+import { WINDOW_NAME, WINDOW_SIZE } from '@shared/config/window';
 import { convertUriToStandard, ELECTRON_TAG, isLocalhostURI, UNSAFE_HEADERS } from '@shared/modules/headers';
-import { isUndefined } from '@shared/modules/validate';
+import { isPositiveFiniteNumber, isUndefined } from '@shared/modules/validate';
 import type { BrowserWindowConstructorOptions } from 'electron';
 import { app, BrowserWindow, ipcMain, nativeImage, nativeTheme, shell } from 'electron';
 import windowStateKeeper from 'electron-window-state';
@@ -36,14 +36,28 @@ export class WindowService {
     return WindowService.instance;
   }
 
+  public computedSize(size: number): number {
+    return Math.ceil(size * configManager.zoom);
+  }
+
+  public getWindowSize(name: string, type: 'default' | 'min' = 'default', computed: boolean = true): ISize {
+    const config = WINDOW_SIZE[name] ?? WINDOW_SIZE[WINDOW_NAME.OTHER];
+    const size = config[type];
+
+    if (!computed) return { ...size };
+
+    return {
+      width: this.computedSize(size.width),
+      height: this.computedSize(size.height),
+    };
+  }
+
   public getAllNames(): string[] {
-    return Array.from(this.winPool.keys());
+    return [...this.winPool.keys()];
   }
 
   public getAllWindows(): BrowserWindow[] {
-    return Array.from(this.winPool.values())
-      .map((item) => item.window!)
-      .filter((win) => win instanceof BrowserWindow);
+    return Array.from(this.winPool.values(), (item) => item.window!).filter((win) => win instanceof BrowserWindow);
   }
 
   public getWindowName(mainWindow: BrowserWindow): string | null {
@@ -66,6 +80,60 @@ export class WindowService {
     }
 
     return null;
+  }
+
+  public setZoomWindow(window: string | BrowserWindow, zoom: number) {
+    if (!isPositiveFiniteNumber(zoom)) {
+      return;
+    }
+
+    const mainWindow = this.getWindow(window);
+
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return;
+    }
+
+    const newZoom = Math.min(Math.max(Number(zoom.toFixed(1)), 0.5), 2.0);
+
+    const currentZoom = mainWindow.webContents.getZoomFactor();
+    if (Math.abs(newZoom - currentZoom) < 0.01) return;
+
+    const windowName = this.getWindowName(mainWindow)!;
+
+    const [currentWidth, currentHeight] = mainWindow.getSize();
+    const baseWidth = currentWidth / currentZoom;
+    const baseHeight = currentHeight / currentZoom;
+
+    const calculatedSize = {
+      width: Math.round(baseWidth * newZoom),
+      height: Math.round(baseHeight * newZoom),
+    };
+
+    const minConfSize = this.getWindowSize(windowName, 'min', false);
+    const minSize = {
+      width: Math.round(minConfSize.width * newZoom),
+      height: Math.round(minConfSize.height * newZoom),
+    };
+
+    const defaultConfSize = this.getWindowSize(windowName, 'default', false);
+    const defaultSize = {
+      width: Math.round(defaultConfSize.width * newZoom),
+      height: Math.round(defaultConfSize.height * newZoom),
+    };
+
+    const finalSize = {
+      width: calculatedSize.width < minSize.width ? defaultSize.width : calculatedSize.width,
+      height: calculatedSize.height < minSize.height ? defaultSize.height : calculatedSize.height,
+    };
+
+    mainWindow.setMinimumSize(minSize.width, minSize.height);
+    mainWindow.setSize(finalSize.width, finalSize.height);
+    mainWindow.webContents.setZoomFactor(newZoom);
+  }
+
+  public setZoomWindows(zoom: number) {
+    const windows = this.getAllWindows();
+    windows.forEach((win) => this.setZoomWindow(win, zoom));
   }
 
   public showWindow(window: string | BrowserWindow) {
@@ -242,7 +310,7 @@ export class WindowService {
       finish();
     };
 
-    const timer = setTimeout(() => onAck(), 800);
+    const timer = setTimeout(onAck, 800);
 
     ipcMain.once(IPC_CHANNEL.WINDOW_DESTROY_RELAY, onAck);
     mainWindow.webContents.send(IPC_CHANNEL.WINDOW_DESTROY);
@@ -282,7 +350,7 @@ export class WindowService {
 
   private setupWindowEvents(mainWindow: BrowserWindow) {
     mainWindow.once('ready-to-show', () => {
-      // mainWindow.webContents.setZoomFactor(configManager.zoom);
+      mainWindow.webContents.setZoomFactor(configManager.zoom);
 
       // [mac]hacky-fix: miniWindow set visibleOnFullScreen:true will cause dock icon disappeared
       app.dock?.show();
@@ -536,8 +604,8 @@ export class WindowService {
     mainWindow = new BrowserWindow(
       merge(
         {
-          width: 960,
-          height: 600,
+          width: WINDOW_SIZE[WINDOW_NAME.OTHER].default.width,
+          height: WINDOW_SIZE[WINDOW_NAME.OTHER].default.height,
           show: false,
           autoHideMenuBar: true,
           transparent: false,
@@ -576,22 +644,24 @@ export class WindowService {
   }
 
   public createMainWindow(): BrowserWindow {
+    const windowName = WINDOW_NAME.MAIN;
+
     const mainWindowState = windowStateKeeper({
       path: APP_DATABASE_PATH,
-      file: `${WINDOW_NAME.MAIN}-window-state.json`,
-      defaultWidth: 1000,
-      defaultHeight: 640,
+      file: `${windowName}-window-state.json`,
+      defaultWidth: this.getWindowSize(windowName, 'default').width,
+      defaultHeight: this.getWindowSize(windowName, 'default').height,
       fullScreen: false,
       maximize: false,
     });
 
-    const mainWindow = this.createWindow(WINDOW_NAME.MAIN, {
+    const mainWindow = this.createWindow(windowName, {
       x: mainWindowState.x,
       y: mainWindowState.y,
       width: mainWindowState.width,
       height: mainWindowState.height,
-      minWidth: 1000,
-      minHeight: 640,
+      minWidth: this.getWindowSize(windowName, 'min').width,
+      minHeight: this.getWindowSize(windowName, 'min').height,
       show: false,
       autoHideMenuBar: true,
       transparent: false,
@@ -603,12 +673,15 @@ export class WindowService {
         ? {
             titleBarStyle: 'hidden',
             titleBarOverlay: nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
-            trafficLightPosition: { x: 8, y: 14 },
+            trafficLightPosition: isMacOSTahoe ? { x: 8, y: 14 } : { x: 12, y: 14 },
           }
         : {
             frame: false, // Frameless window for Windows and Linux
           }),
-      backgroundColor: isMacOS ? undefined : nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF',
+      ...(isWindows22H2 ? { backgroundMaterial: 'mica' } : {}),
+      ...(!isMacOS && !isWindows22H2
+        ? { backgroundColor: nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF' }
+        : {}),
       darkTheme: nativeTheme.shouldUseDarkColors,
       webPreferences: {
         webviewTag: true,
@@ -633,22 +706,24 @@ export class WindowService {
   }
 
   public createPlayerWindow(): BrowserWindow {
+    const windowName = WINDOW_NAME.PLAYER;
+
     const mainWindowState = windowStateKeeper({
       path: APP_DATABASE_PATH,
-      file: `${WINDOW_NAME.PLAYER}-window-state.json`,
-      defaultWidth: 960,
-      defaultHeight: 600,
+      file: `${windowName}-window-state.json`,
+      defaultWidth: this.getWindowSize(windowName, 'default').width,
+      defaultHeight: this.getWindowSize(windowName, 'default').height,
       fullScreen: false,
       maximize: false,
     });
 
-    const mainWindow = this.createWindow(WINDOW_NAME.PLAYER, {
+    const mainWindow = this.createWindow(windowName, {
       x: mainWindowState.x,
       y: mainWindowState.y,
       width: mainWindowState.width,
       height: mainWindowState.height,
-      minWidth: 528,
-      minHeight: 297,
+      minWidth: this.getWindowSize(windowName, 'min').width,
+      minHeight: this.getWindowSize(windowName, 'min').height,
       show: false,
       autoHideMenuBar: true,
       transparent: false,
@@ -660,12 +735,15 @@ export class WindowService {
         ? {
             titleBarStyle: 'hidden',
             titleBarOverlay: nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
-            trafficLightPosition: { x: 8, y: 14 },
+            trafficLightPosition: isMacOSTahoe ? { x: 8, y: 14 } : { x: 12, y: 14 },
           }
         : {
             frame: false, // Frameless window for Windows and Linux
           }),
-      backgroundColor: isMacOS ? undefined : nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF',
+      ...(isWindows22H2 ? { backgroundMaterial: 'mica' } : {}),
+      ...(!isMacOS && !isWindows22H2
+        ? { backgroundColor: nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF' }
+        : {}),
       darkTheme: nativeTheme.shouldUseDarkColors,
     });
 
@@ -691,32 +769,30 @@ export class WindowService {
     if (!isPackaged && process.env.ELECTRON_RENDERER_URL) {
       mainWindow.loadURL(`${process.env.ELECTRON_RENDERER_URL}/#/player`);
     } else {
-      mainWindow.loadURL(
-        url.format({
-          pathname: join(import.meta.dirname, '../renderer/index.html'),
-          protocol: 'file:',
-          slashes: true,
-          hash: 'player',
-        }),
-      );
+      mainWindow.loadFile(join(import.meta.dirname, '../renderer/index.html'), { hash: 'player' });
     }
-
     return mainWindow;
   }
 
   public createBrowserWindow(): BrowserWindow {
+    const windowName = WINDOW_NAME.BROWSER;
+
     const mainWindowState = windowStateKeeper({
       path: APP_DATABASE_PATH,
-      file: `${WINDOW_NAME.BROWSER}-window-state.json`,
-      defaultWidth: 1000,
-      defaultHeight: 640,
+      file: `${windowName}-window-state.json`,
+      defaultWidth: this.getWindowSize(windowName, 'default').width,
+      defaultHeight: this.getWindowSize(windowName, 'default').height,
       fullScreen: false,
       maximize: false,
     });
 
-    const mainWindow = this.createWindow(WINDOW_NAME.BROWSER, {
-      minWidth: 1000,
-      minHeight: 640,
+    const mainWindow = this.createWindow(windowName, {
+      x: mainWindowState.x,
+      y: mainWindowState.y,
+      width: mainWindowState.width,
+      height: mainWindowState.height,
+      minWidth: this.getWindowSize(windowName, 'min').width,
+      minHeight: this.getWindowSize(windowName, 'min').height,
       show: false,
       autoHideMenuBar: true,
       transparent: false,
@@ -728,12 +804,15 @@ export class WindowService {
         ? {
             titleBarStyle: 'hidden',
             titleBarOverlay: nativeTheme.shouldUseDarkColors ? titleBarOverlayDark : titleBarOverlayLight,
-            trafficLightPosition: { x: 8, y: 14 },
+            trafficLightPosition: isMacOSTahoe ? { x: 8, y: 14 } : { x: 12, y: 14 },
           }
         : {
             frame: false, // Frameless window for Windows and Linux
           }),
-      backgroundColor: isMacOS ? undefined : nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF',
+      ...(isWindows22H2 ? { backgroundMaterial: 'mica' } : {}),
+      ...(!isMacOS && !isWindows22H2
+        ? { backgroundColor: nativeTheme.shouldUseDarkColors ? '#181818' : '#FFFFFF' }
+        : {}),
       darkTheme: nativeTheme.shouldUseDarkColors,
       webPreferences: {
         webviewTag: true,
@@ -753,14 +832,7 @@ export class WindowService {
     if (!isPackaged && process.env.ELECTRON_RENDERER_URL) {
       mainWindow.loadURL(`${process.env.ELECTRON_RENDERER_URL}/#/browser`);
     } else {
-      mainWindow.loadURL(
-        url.format({
-          pathname: join(import.meta.dirname, '../renderer/index.html'),
-          protocol: 'file:',
-          slashes: true,
-          hash: 'browser',
-        }),
-      );
+      mainWindow.loadFile(join(import.meta.dirname, '../renderer/index.html'), { hash: 'browser' });
     }
 
     return mainWindow;

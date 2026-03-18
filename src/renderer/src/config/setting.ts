@@ -9,6 +9,7 @@ export interface IStoreSetting {
   timeout: number;
   debug: boolean;
   bossKey: string;
+  zoom: number;
   nav: {
     setting: string;
     lab: string;
@@ -23,6 +24,7 @@ export const init: IStoreSetting = {
   timeout: 5000,
   debug: false,
   bossKey: '',
+  zoom: 1,
   nav: {
     setting: 'baseConfig',
     lab: 'crypto',

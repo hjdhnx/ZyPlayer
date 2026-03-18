@@ -6,7 +6,7 @@
 # upDate  : 2024/04/09 取html返回的文本自动解除转义, 防止script里取Html的内容被转义无法执行
 # upDate  : 2024/05/16 支持:not,even,odd,has,contans,matches,empty 新特性, pdfh取属性支持||
 
-import ujson
+import json
 from pyquery import PyQuery as pq
 from urllib.parse import urljoin
 import re
@@ -251,7 +251,7 @@ class Jsoup:
         if isinstance(html, str):
             # print(html)
             try:
-                html = ujson.loads(html)
+                html = json.loads(html)
                 # html = eval(html)
             except:
                 print('字符串转json失败')
@@ -280,7 +280,7 @@ class Jsoup:
             return []
         if isinstance(html, str):
             try:
-                html = ujson.loads(html)
+                html = json.loads(html)
             except:
                 return []
         if not parse.startswith('$.'):

@@ -110,7 +110,7 @@ export const china = [
   },
 ];
 
-export const outher = [
+export const other = [
   {
     url: 'https://www.360kan.com',
     host: '360kan.com',

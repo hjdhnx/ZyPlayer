@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { request } from '@main/utils/request';
 import { getSchema, setSchema } from '@server/schemas/v0/proxy';
+import { PROXY_API } from '@shared/config/env';
 import { base64, hash } from '@shared/modules/crypto';
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -88,7 +89,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const cacheKey = generateCacheKey(url);
       fastify.cache.set(cacheKey, text);
 
-      return { code: 0, msg: 'ok', data: `http://127.0.0.1:9978/proxy?url=${encodeURIComponent(url)}` };
+      return {
+        code: 0,
+        msg: 'ok',
+        data: `${PROXY_API}}?url=${encodeURIComponent(url)}`,
+      };
     },
   );
 };

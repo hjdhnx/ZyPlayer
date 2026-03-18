@@ -12,6 +12,7 @@ import {
 } from '@main/utils/file';
 import { APP_FILE_PATH } from '@main/utils/path';
 import { autoSchema, makeSchema } from '@server/schemas/v1/file/film';
+import { PREFIX_API } from '@shared/config/env';
 import { randomUUID } from '@shared/modules/crypto';
 import type { FastifyPluginAsync, FastifyRequest } from 'fastify';
 
@@ -33,12 +34,12 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         if (ext === '.js') {
           return 'https://raw.githubusercontent.com/hjdhnx/drpy-webpack/refs/heads/main/src/drpy2.min.js';
         }
-        if (ext === '.py') return `http://127.0.0.1:9978/api/v1/file/manage/${type}/${path}`;
+        if (ext === '.py') return `${PREFIX_API}/v1/file/manage/${type}/${path}`;
         return '';
       };
       const matchExt = (ext: string, path: string) => {
         if (ext === '.js') {
-          return `http://127.0.0.1:9978/api/v1/file/manage/${type}/${path}`;
+          return `${PREFIX_API}/v1/file/manage/${type}/${path}`;
         }
         if (ext === '.py') return '';
         return '';

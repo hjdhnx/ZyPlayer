@@ -1,6 +1,7 @@
-import { isNumber, isPositiveFiniteNumber } from '@shared/modules/validate';
 import type { ConfigType, Dayjs, ManipulateType, UnitType } from 'dayjs';
 import dayjs from 'dayjs';
+
+import { isNumber, isPositiveFiniteNumber } from './validate';
 
 type TimeUnit = 's' | 'ms';
 

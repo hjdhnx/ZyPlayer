@@ -76,10 +76,10 @@ import type { IModels } from '@shared/types/db';
 import { cloneDeep } from 'es-toolkit';
 import PQueue from 'p-queue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onActivated, onMounted, ref } from 'vue';
+import { computed, onActivated, onMounted, ref, toRaw } from 'vue';
 
 import { fetchPluginPage } from '@/api/plugin';
-import DialogDocument from '@/components/dialog-docment/index.vue';
+import DialogDocument from '@/components/dialog-document/index.vue';
 // import { installPlugin, startPlugin, stopPlugin, uninstallPlugin } from '@/api/plugin';
 import SettingTable from '@/components/setting-table/index.vue';
 import { emitterChannel, emitterSource } from '@/config/emitterChannel';
@@ -140,7 +140,7 @@ onActivated(() => {
   emitter.on(emitterChannel.REFRESH_PLUGIN_CONFIG, reloadConfig);
 });
 
-const reloadConfig = async (eventData: { source: string; data: any }) => {
+const reloadConfig = async ({ data: eventData }) => {
   const { source } = eventData;
   if (source === emitterSource.SETTING_TABLE) return;
 
@@ -255,9 +255,9 @@ const handleOperation = async (type: string, payload: any) => {
       formData.value = { id: '' };
       dialogState.value.visibleForm = true;
     },
-    enable: () => enableItem(payload),
-    disable: () => disableItem(payload),
-    delete: () => uninstallItem(payload),
+    enable: () => enableItem(toRaw(payload)),
+    disable: () => disableItem(toRaw(payload)),
+    delete: () => uninstallItem(toRaw(payload)),
     preview: () => window.electron.ipcRenderer.invoke(IPC_CHANNEL.WINDOW_BROWSER, payload.web),
     info: () => {
       const cloneDoc = cloneDeep(payload);

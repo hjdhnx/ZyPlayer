@@ -40,7 +40,7 @@ export const useSettingStore = defineStore('setting', {
 
       return lang;
     },
-    isChinaMainland: (state): boolean => {
+    isCHS: (state): boolean => {
       let lang = state.lang;
 
       if (lang === 'system') {
@@ -67,6 +67,11 @@ export const useSettingStore = defineStore('setting', {
 
       window.electron.ipcRenderer.invoke(IPC_CHANNEL.CHANGE_LANG, lang);
     },
+    changePreferredZoom() {
+      const zoom = this.zoom;
+
+      window.electron.ipcRenderer.invoke(IPC_CHANNEL.CHANGE_ZOOM, zoom);
+    },
     changePreferredBossKey() {
       const bossKey = this.bossKey;
 
@@ -88,6 +93,9 @@ export const useSettingStore = defineStore('setting', {
         }
         if (key === 'lang') {
           this.changePreferredLang();
+        }
+        if (key === 'zoom') {
+          this.changePreferredZoom();
         }
         if (key === 'bossKey') {
           this.changePreferredBossKey();

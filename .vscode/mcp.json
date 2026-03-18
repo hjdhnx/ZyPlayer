@@ -1,0 +1,20 @@
+{
+  "servers": {
+    "debug-electron-mcp": {
+      "args": ["-y", "@debugelectron/debug-electron-mcp@latest"],
+      "command": "npx"
+    },
+    "swagger-mcp": {
+      "args": ["-y", "swagger-mcp@latest"],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "http://127.0.0.1:9978",
+        "API_DOCS_URL": "http://127.0.0.1:9978/docs/json"
+      }
+    },
+    "tdesign-mcp-server": {
+      "args": ["-y", "tdesign-mcp-server"],
+      "command": "npx"
+    }
+  }
+}

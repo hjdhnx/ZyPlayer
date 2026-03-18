@@ -170,6 +170,7 @@ const handleExecute = () => {
       }
     });
   } catch (error) {
+    console.error(error);
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
   }
 };
@@ -179,9 +180,8 @@ const handleCopy = async (val: string) => {
 
   try {
     await navigator.clipboard.writeText(val);
-    MessagePlugin.info(t('common.copySuccess'));
+    MessagePlugin.success(t('common.copySuccess'));
   } catch (error) {
-    console.error(error);
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
   }
 };

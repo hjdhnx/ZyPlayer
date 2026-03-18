@@ -391,6 +391,37 @@ export function isTimestamp(value: unknown, type: 'ms' | 's' = 'ms'): boolean {
   return String(value).length === 10;
 }
 
+/**
+ * Check if string is a valid user agent
+ * @param value - String to check
+ * @param strict - If true, will check for strict user agent format (no control characters), default is false
+ * @returns Returns true if it's a valid user agent, otherwise false
+ */
+export function isValidUa(value: unknown, strict: boolean = false): boolean {
+  if (!isString(value) || isStrEmpty(value)) return false;
+
+  // eslint-disable-next-line no-control-regex
+  const CONTROL_CHARS_RE = /[\u0000-\u001F\u007F]/; // e.g. \r\n\t and other control characters
+  const MOZILLA_RE = /^Mozilla\/\d+\.\d+/i;
+  const PLATFORM_RE = /\([^)]{2,}\)/; // e.g. (Windows NT 10.0; Win64; x64)
+  const ENGINE_RE = /\b(?:AppleWebKit|Gecko|Trident)\/\d[\d.]*/i;
+  const BROWSER_RE = /\b(?:Chrome|CriOS|Firefox|FxiOS|Safari|Edg|Edge|OPR|Opera|MSIE)\/\d[\d.]*/i;
+  const FORBIDDEN_RE = /\b(?:python|curl|wget|scrapy|crawler|spider|phantomjs|selenium|headless)\b/i;
+  const ESCAPED_HEX_RE = /\\x[0-9a-f]{2}/i;
+  const EXCESSIVE_URL_ENCODE_RE = /(?:%[0-9a-f]{2}){3,}/i;
+
+  if (CONTROL_CHARS_RE.test(value)) return false;
+
+  if (!strict) return true;
+
+  // Strict
+  const hasValidStructure =
+    MOZILLA_RE.test(value) && PLATFORM_RE.test(value) && ENGINE_RE.test(value) && BROWSER_RE.test(value);
+  const hasForbiddenContent =
+    FORBIDDEN_RE.test(value) || ESCAPED_HEX_RE.test(value) || EXCESSIVE_URL_ENCODE_RE.test(value);
+  return hasValidStructure && !hasForbiddenContent;
+}
+
 export default {
   isNumber,
   isIntNumber,
@@ -420,4 +451,5 @@ export default {
   isUUID,
   isPort,
   isTimestamp,
+  isValidUa,
 };

@@ -35,6 +35,7 @@
 </template>
 <script setup lang="ts">
 import { APP_NAME } from '@shared/config/appinfo';
+import { SYSTEM_M3U8_AD_REMOVE_API } from '@shared/config/env';
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
 import type { IBarrageResult } from '@shared/types/barrage';
 import { merge } from 'es-toolkit';
@@ -48,7 +49,6 @@ import type { IStorePlayer } from '@/config/player';
 import { t } from '@/locales';
 import { usePlayerStore } from '@/store';
 import type { IVideoProcess } from '@/types/player';
-import { systemM3u8AdRemoveApi } from '@/utils/env';
 
 import LHeader from './components/Header.vue';
 
@@ -121,11 +121,11 @@ const toggleAside = () => {
 };
 
 const handleUrlAdRemove = (url: string, remove: boolean = false): string => {
-  if (remove && url.startsWith('http') && !url.startsWith(systemM3u8AdRemoveApi)) {
-    return `${systemM3u8AdRemoveApi}?url=${encodeURIComponent(url)}`;
+  if (remove && url.startsWith('http') && !url.startsWith(SYSTEM_M3U8_AD_REMOVE_API)) {
+    return `${SYSTEM_M3U8_AD_REMOVE_API}?url=${encodeURIComponent(url)}`;
   }
-  if (!remove && url.startsWith('http') && url.startsWith(systemM3u8AdRemoveApi)) {
-    return decodeURIComponent(url.replace(`${systemM3u8AdRemoveApi}?url=`, ''));
+  if (!remove && url.startsWith('http') && url.startsWith(SYSTEM_M3U8_AD_REMOVE_API)) {
+    return decodeURIComponent(url.replace(`${SYSTEM_M3U8_AD_REMOVE_API}?url=`, ''));
   }
   return url;
 };

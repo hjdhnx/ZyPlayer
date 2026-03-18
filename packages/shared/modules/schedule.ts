@@ -146,7 +146,7 @@ export class ScheduleManager {
    * Clear all schedules
    */
   public clearAllSchedules(): void {
-    const schedulesArray = Array.from(this.schedules.values());
+    const schedulesArray = [...this.schedules.values()];
     schedulesArray.forEach((schedule) => {
       if (schedule.instance) {
         schedule.instance.clear();

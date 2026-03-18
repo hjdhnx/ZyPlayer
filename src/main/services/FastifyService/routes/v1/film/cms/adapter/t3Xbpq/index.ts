@@ -5,24 +5,7 @@ import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { hash } from '@shared/modules/crypto';
 import { getHome, urlResolve } from '@shared/modules/headers';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
 
 import {
@@ -466,7 +449,7 @@ class T3XbpqAdapter {
     };
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let res = this.source.ext;
     if (this.source.ext!.startsWith('http')) {
       const { data } = await request.request({
@@ -694,7 +677,7 @@ class T3XbpqAdapter {
     }
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const classData = this.getRuleValue(['分类']);
     const rawClassList: Array<{ type_id: string; type_name: string }> = [];
 
@@ -746,7 +729,7 @@ class T3XbpqAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const 主页url = this.getRuleValue(['主页url'], '');
     const 分类url = getHome(this.getRuleValue(['分类url']));
     const 主页surl = this.rule['主页surl'] || '';
@@ -788,7 +771,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page: pg = 1, extend = {} } = doc || {};
 
     let host = getHome(this.getRuleValue(['分类url']));
@@ -874,7 +857,7 @@ class T3XbpqAdapter {
         if (Object.hasOwn(extend, k) && extend[k] !== '') {
           /* empty */
         } else {
-          for (const vv of Array.from(value.v)) {
+          for (const vv of [...value.v]) {
             if (url.includes(vv)) {
               url = url.replace(vv, '');
               break;
@@ -920,7 +903,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const idsArray = ids.split(',');
     let vod_url = ids || '';
@@ -1136,7 +1119,7 @@ class T3XbpqAdapter {
     let htmls: string[] = [];
     const plays: string[] = [];
     if (多线数组.length) {
-      const start_time = new Date().getTime();
+      const start_time = Date.now();
       logger.info('多线程开始');
       const heads = this.rule.headers;
       bfs = 多线数组.map((url) => ({
@@ -1154,7 +1137,7 @@ class T3XbpqAdapter {
           }
         }),
       )) as any[];
-      const end_time = new Date().getTime() - start_time;
+      const end_time = Date.now() - start_time;
       logger.info(`多线程结束,耗时: ${end_time}`);
     }
     // logger.info(htmls.length)
@@ -1212,7 +1195,7 @@ class T3XbpqAdapter {
     if (htmls.length === 0) {
       htmls = [html];
     } else {
-      htmls = [html].concat(htmls);
+      htmls = [html, ...htmls];
     }
     // logger.info(htmls.length)
 
@@ -1314,7 +1297,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc;
     let url = this.getRuleValue(['搜索url'], '/index.php/ajax/suggest?mid=1&wd={wd}&limit=500');
     url = url.replace('{wd}', wd).replace('{pg}', String(page)).replace('{catePg}', String(page));
@@ -1435,7 +1418,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc;
     let input = play;
 
@@ -1490,12 +1473,7 @@ class T3XbpqAdapter {
     const jumplay = this.getRuleValue(['跳转播放链接']);
 
     if (input && jumplay) {
-      const h = await this.req(
-        input,
-        Object.assign({}, this.rule.headers, {
-          Referer: getHome(input),
-        }),
-      );
+      const h = await this.req(input, { ...this.rule.headers, ...{ Referer: getHome(input) } });
       let temp = autoContent.splitStr(h, ['跳转播放链接'], {
         type: '链接',
       });
@@ -1532,17 +1510,21 @@ class T3XbpqAdapter {
     return playobj;
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    return '';
+  }
+
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 
   async req(url: string, headers = {}) {
     if (url.includes('时间戳')) {
-      url = url.replace(/时间戳/g, String(new Date().getTime()));
+      url = url.replace(/时间戳/g, String(Date.now()));
     }
     if (url.includes('md5(')) {
       const regex = /md5\((.*?)\)/g;

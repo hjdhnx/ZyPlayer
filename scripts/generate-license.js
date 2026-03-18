@@ -91,7 +91,7 @@ const IGNORED_PACKAGES = new Set([
   'electron',
   'electronmon',
 
-  // outher
+  // other
   'depcheck',
   'eslint',
   'eslint-config-prettier',
@@ -199,7 +199,7 @@ function latestPackages(pkg, index, array) {
       version: id.split('@')?.[1] ?? 'UNKNOWN',
       repository: info.repository ?? 'N/A',
       licenseFile: info.licenseFile ?? '',
-      licenses: [].concat(info.licenses || []).map(normalizeLicense),
+      licenses: [...[], ...(info.licenses || [])].map(normalizeLicense),
     }))
     .filter(validatePackage)
     .filter(latestPackages);

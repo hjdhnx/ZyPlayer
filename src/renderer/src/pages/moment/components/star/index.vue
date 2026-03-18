@@ -427,7 +427,7 @@ const defaultConfig = () => {
   starList.value = [];
 };
 
-const reloadConfig = async (eventData: { source: string; data: any }) => {
+const reloadConfig = async ({ data: eventData }) => {
   const { source } = eventData;
   if (source === emitterSource.PAGE_SHOW) return;
 

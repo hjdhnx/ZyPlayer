@@ -18,9 +18,10 @@ class Storage {
 
   set(key: string, value: any) {
     try {
-      const storage = Object.assign({}, this.get(''), {
-        [key]: value,
-      });
+      const storage = {
+        ...this.get(''),
+        ...{ [key]: value },
+      };
       localStorage.setItem(this.name, JSON.stringify(storage));
     } catch (error) {
       console.error(`[Storage][set] Error: ${error}`);

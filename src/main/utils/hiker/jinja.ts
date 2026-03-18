@@ -102,7 +102,7 @@ class Parser {
       // here we sub out strings so we don't get false matches
       const simplified = matched.replace(STRINGS, '@');
       // if we don't have a close tag or there is a nested open tag
-      if (!match || ~simplified.indexOf(open)) {
+      if (!match || simplified.includes(open)) {
         return index + 1;
       }
       let inner = matched.slice(0, 0 - open.length);
@@ -267,7 +267,7 @@ class Parser {
         const vaild = term !== (term = term.replace(/\(i(%i)*\)/g, 'i'));
         if (!vaild) break;
       }
-      if (!term.match(/^i(%i)*/)) {
+      if (!/^i(?:%i)*/.test(term)) {
         throw new Error(`Invalid expression: ${src}`);
       }
     });
@@ -483,7 +483,7 @@ const getRuntime = function runtime(data: object, opts: RuntimeOptions): Runtime
     return val === null ? null : val;
   };
   const set = function (n: string, val: any) {
-    stack[stack.length - 1][n] = val;
+    stack.at(-1)[n] = val;
   };
   const push = function (ctx?: object) {
     stack.push(ctx || {});

@@ -13,6 +13,7 @@
 import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { emitterChannel } from '@/config/emitterChannel';
 import { prefix } from '@/config/global';
 import emitter from '@/utils/emitter';
 
@@ -23,12 +24,9 @@ const activeRouteFullPath = computed(() => {
 
 const isRouterAlive = ref(true);
 
-emitter.on('reloadComponent', () => {
-  console.info('[content][bus][refresh]');
+emitter.on(emitterChannel.REFRESH_VIEW, () => {
   isRouterAlive.value = false;
-  nextTick(() => {
-    isRouterAlive.value = true;
-  });
+  nextTick(() => (isRouterAlive.value = true));
 });
 </script>
 <style lang="less" scoped>

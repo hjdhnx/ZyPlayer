@@ -8,7 +8,7 @@ const PUB_REGEX = /^-----BEGIN PUBLIC KEY-----[\s\S]+?-----END PUBLIC KEY-----[\
 const PRI_REGEX =
   /^-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----[\s\S]+?-----END (?:RSA |ENCRYPTED )?PRIVATE KEY-----[\s\S]*$/;
 
-const getPad = (pad: string) => {
+const getPad = (pad: string): pki.rsa.EncryptionScheme => {
   switch (pad.toLowerCase()) {
     case 'rsa-oaep':
     case 'rsa-oaep-sha1':
@@ -91,7 +91,10 @@ export const rsa = {
         if (!passphrase) throw new Error('Passphrase is required for encrypted private key');
 
         const passphraseBuffer = wordArrayParse[passphraseEncode](passphrase);
-        rsaKey = pki.decryptRsaPrivateKey(key, forgeArrayToBytes(wordArrayToArray(passphraseBuffer)).getBytes());
+        rsaKey = pki.decryptRsaPrivateKey(
+          key,
+          forgeArrayToBytes(wordArrayToArray(passphraseBuffer) as unknown as ArrayBuffer).getBytes(),
+        );
       } else {
         rsaKey = pki.privateKeyFromPem(key);
       }
@@ -108,9 +111,9 @@ export const rsa = {
       }
 
       schemeOptions = {
-        md: md[algorithm].create(),
+        md: (md[algorithm as keyof typeof md] as { create: () => any }).create(),
         mgf1: {
-          md: md[algorithm].create(),
+          md: (md[algorithm as keyof typeof md] as { create: () => any }).create(),
         },
       };
     }
@@ -136,7 +139,12 @@ export const rsa = {
 
         const chunk = chunks.slice(offSet, end);
 
-        const encryptedChunk = rsaKey.encrypt(forgeArrayToBytes(chunk).getBytes(), padding as any, schemeOptions);
+        // @ts-expect-error use before
+        const encryptedChunk = (rsaKey as pki.rsa.PublicKey).encrypt(
+          forgeArrayToBytes(chunk).getBytes(),
+          padding,
+          schemeOptions,
+        );
         encryptedChunks.push(encryptedChunk);
 
         offSet += MAX_ENCRYPT_BLOCK;
@@ -144,16 +152,16 @@ export const rsa = {
 
       encrypted = encryptedChunks.join('');
     } else {
-      encrypted = rsaKey.encrypt(
-        forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes(),
-        padding as any,
+      // @ts-expect-error use before
+      encrypted = (rsaKey as pki.rsa.PublicKey).encrypt(
+        forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes(),
+        padding,
         schemeOptions,
       );
     }
 
-    return forgeStringify[outputEncode](encrypted);
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](encrypted as never);
   },
-
   /**
    * RSA 解密 - 支持长解密
    * https://emn178.github.io/online-tools/rsa/decrypt/
@@ -235,7 +243,10 @@ export const rsa = {
         if (!passphrase) throw new Error('Passphrase is required for encrypted private key');
 
         const passphraseBuffer = wordArrayParse[passphraseEncode](passphrase);
-        rsaKey = pki.decryptRsaPrivateKey(key, forgeArrayToBytes(wordArrayToArray(passphraseBuffer)).getBytes());
+        rsaKey = pki.decryptRsaPrivateKey(
+          key,
+          forgeArrayToBytes(wordArrayToArray(passphraseBuffer) as unknown as ArrayBuffer).getBytes(),
+        );
       } else {
         rsaKey = pki.privateKeyFromPem(key);
       }
@@ -252,9 +263,9 @@ export const rsa = {
       }
 
       schemeOptions = {
-        md: md[algorithm].create(),
+        md: (md[algorithm as keyof typeof md] as { create: () => any }).create(),
         mgf1: {
-          md: md[algorithm].create(),
+          md: (md[algorithm as keyof typeof md] as { create: () => any }).create(),
         },
       };
     }
@@ -262,10 +273,11 @@ export const rsa = {
     let decryptedBytes = '';
 
     if (long) {
-      const bytes = forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes();
+      const bytes = forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes();
 
       // 对于RSA解密，块大小固定为密钥长度
       // 例如：2048位RSA密钥对应256字节的块大小
+      // @ts-expect-error use before
       const keySize = rsaKey.n.bitLength() / 8; // 获取密钥长度（字节）
       const MAX_DECRYPT_BLOCK = keySize || 256; // 如果无法获取密钥长度，默认使用256字节（适用于2048位密钥）
 
@@ -282,7 +294,8 @@ export const rsa = {
 
         const chunk = bytes.substring(offSet, end);
 
-        const decryptedChunk = rsaKey.decrypt(chunk, padding, schemeOptions);
+        // @ts-expect-error use before
+        const decryptedChunk = (rsaKey as pki.rsa.PrivateKey).decrypt(chunk, padding, schemeOptions);
         decryptedChunks.push(decryptedChunk);
 
         offSet += MAX_DECRYPT_BLOCK;
@@ -290,13 +303,14 @@ export const rsa = {
 
       decryptedBytes = decryptedChunks.join('');
     } else {
-      decryptedBytes = rsaKey.decrypt(
-        forgeArrayToBytes(wordArrayToArray(srcBuffer)).getBytes(),
+      // @ts-expect-error use before
+      decryptedBytes = (rsaKey as pki.rsa.PrivateKey).decrypt(
+        forgeArrayToBytes(wordArrayToArray(srcBuffer) as unknown as ArrayBuffer).getBytes(),
         padding,
         schemeOptions,
       );
     }
 
-    return forgeStringify[outputEncode](decryptedBytes);
+    return forgeStringify[outputEncode as keyof typeof forgeStringify](decryptedBytes as never);
   },
 };

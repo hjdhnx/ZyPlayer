@@ -1,7 +1,7 @@
-import type { IAigcProviderType, IPlayerType, IRecHotType, ISnifferType } from '@shared/config/setting';
-import type { ITheme } from '@shared/config/theme';
-import { USER_AGENT } from '@shared/config/userAgent';
-import type { ILang } from '@shared/locales';
+import type { IAigcProviderType, IPlayerType, IRecHotType, ISnifferType } from '../config/setting';
+import type { ITheme } from '../config/theme';
+import { USER_AGENT } from '../config/userAgent';
+import type { ILang } from '../locales';
 
 export const settingList = [
   { key: 'version', value: '3.4.1' },

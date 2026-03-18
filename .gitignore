@@ -26,12 +26,12 @@ venv
 uv.lock
 
 # Build Outputs
-dist
+.next
 dev-dist
+dist
 dist-ssr
+out
 packages/*/build
-.next/
-out/
 
 # Turbo
 .turbo
@@ -48,24 +48,29 @@ out/
 *.sublime-workspace
 
 # IDE
-.vscode/*
-**/.idea/*
 .aider*
 .claude/*
 .claude-code-router/*
 .codebuddy/*
 .cursor/*
+!.claude/skills/
+!.claude/skills/**
 .gemini/*
+.idea/*
+**/.idea/*
 .qwen/*
 .trae/*
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/mcp.json
+!.vscode/settings.json
 .zed/*
 
 # Env
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+!.env.example
 
 # OS
 .DS_Store
@@ -78,6 +83,8 @@ coverage
 .vitest-cache
 vitest.config.*.timestamp-*
 .nyc_output
+playwright-report
+test-results
 
 # TypeScript incremental build
 .tsbuildinfo
@@ -91,9 +98,8 @@ vitest.config.*.timestamp-*
 # Runtime
 pids
 *.pid
-*.seed
 *.pid.lock
-thumbnail/
+*.seed
 *.pyc
 __pycache__/
 

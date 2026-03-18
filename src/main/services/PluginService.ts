@@ -139,8 +139,7 @@ class PluginService {
 
   constructor(options?: Partial<IPluginOptions>) {
     this.registry =
-      options?.registry ??
-      (appLocale.isChinaMainland() ? 'https://registry.npmmirror.com/' : 'https://registry.npmjs.org/');
+      options?.registry ?? (appLocale.isCHS() ? 'https://registry.npmmirror.com/' : 'https://registry.npmjs.org/');
     this.maxWorkers = Math.max(1, os.cpus().length - 1);
   }
 

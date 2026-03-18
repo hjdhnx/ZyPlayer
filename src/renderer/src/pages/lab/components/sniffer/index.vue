@@ -146,7 +146,7 @@ const handleCopy = async (e: Event) => {
 
   try {
     await navigator.clipboard.writeText(val);
-    MessagePlugin.info(t('common.copySuccess'));
+    MessagePlugin.success(t('common.copySuccess'));
   } catch (error) {
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
   }

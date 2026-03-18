@@ -96,6 +96,7 @@ export default {
   log: 'Log',
   cache: 'Cache',
   support: 'Support',
+  unSupport: 'UnSupport',
   scan: 'Scan',
   space: 'Space',
   data: 'Data',

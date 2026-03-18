@@ -6,24 +6,7 @@ import { MOBILE_UA, PC_UA } from '@main/utils/hiker/ua';
 import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { getHome } from '@shared/modules/headers';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
 
 const logger = loggerService.withContext(SITE_LOGGER_MAP[SITE_TYPE.T3_XYQ]);
@@ -74,7 +57,7 @@ class T3XyqAdapter {
     };
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let resp: string = this.source.ext;
     if (this.source.ext.startsWith('http')) {
       const { data } = await request.request({
@@ -119,7 +102,7 @@ class T3XyqAdapter {
     }
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const XYQRULE = this.XYQRULE;
     const typenames = XYQRULE['分类名称'] ? XYQRULE['分类名称'].split('&') : [];
     const typeids = XYQRULE['分类名称替换词'] ? XYQRULE['分类名称替换词'].split('&') : [];
@@ -207,10 +190,10 @@ class T3XyqAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const XYQRULE = this.XYQRULE;
     const html = await this.getCode(XYQRULE['首页推荐链接'] || this.rule.host);
-    const list: ICmsHomeVod['list'] = [];
+    const list: Awaited<ICmsResultPromise['homeVod']>['list'] = [];
     if (XYQRULE['首页片单是否Jsoup写法'] === '1' || XYQRULE['首页片单是否Jsoup写法'] === '是') {
       const listArr = pdfa(html, XYQRULE['首页列表数组规则']);
       let ls = XYQRULE['首页片单列表数组规则'];
@@ -255,7 +238,7 @@ class T3XyqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page: pg, extend = {} } = doc;
 
     const XYQRULE = this.XYQRULE;
@@ -272,7 +255,7 @@ class T3XyqAdapter {
       replacePlaceholders(url.replaceAll('{catePg}', `${pg}`), extend).replaceAll('{cateId}', tid),
     );
 
-    const list: ICmsCategory['list'] = [];
+    const list: Awaited<ICmsResultPromise['category']>['list'] = [];
     if (
       (XYQRULE['分类片单是否Jsoup写法'] === '1' || XYQRULE['分类片单是否Jsoup写法'] === '是') &&
       XYQRULE['分类列表数组规则']
@@ -345,7 +328,7 @@ class T3XyqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const idsArray = ids.split(',');
     const vod_url = ids || '';
@@ -401,7 +384,7 @@ class T3XyqAdapter {
             } else {
               n = pdfh(it, v);
             }
-            linename = linename.concat(n);
+            linename = `${linename}${n}`;
           });
           tabs.push(linename);
         });
@@ -477,7 +460,7 @@ class T3XyqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page } = doc;
 
     const XYQRULE = this.XYQRULE;
@@ -522,7 +505,7 @@ class T3XyqAdapter {
     } else {
       html = await this.getCode(url, headers);
     }
-    const list: ICmsSearch['list'] = [];
+    const list: Awaited<ICmsResultPromise['search']>['list'] = [];
     const sslist = pdfa(html, XYQRULE['搜索列表数组规则']);
 
     for (let i = 0; i < sslist.length; i++) {
@@ -575,17 +558,21 @@ class T3XyqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { play } = doc || {};
     const parse = /\.(?:m3u8|mp4|mpd|flv|mkv)/.test(play) ? 0 : 1;
     return { url: play, parse };
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    return '';
+  }
+
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): Promise<ICmsResultPromise['runMain']> {
     return '';
   }
 

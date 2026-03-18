@@ -39,8 +39,8 @@ class Jsoup {
       const new_parses: string[] = []; //  构造新的解析表达式列表
       for (let i = 0; i < parses.length; i++) {
         const ps_list = parses[i].split(' ');
-        const ps = ps_list[ps_list.length - 1]; // 如果分割&&后带空格就取最后一个元素
-        if (!this.test(NOADD_INDEX, ps)) {
+        const ps = ps_list.at(-1); // 如果分割&&后带空格就取最后一个元素
+        if (!this.test(NOADD_INDEX, ps!)) {
           if (!first && i >= parses.length - 1) {
             // 不传first且遇到最后一个,不用补eq(0)
             new_parses.push(parses[i]);
@@ -54,8 +54,8 @@ class Jsoup {
       parse = new_parses.join(' ');
     } else {
       const ps_list = parse.split(' ');
-      const ps = ps_list[ps_list.length - 1]; // 如果带空格就取最后一个元素
-      if (!this.test(NOADD_INDEX, ps) && first) {
+      const ps = ps_list.at(-1); // 如果带空格就取最后一个元素
+      if (!this.test(NOADD_INDEX, ps!) && first) {
         parse = `${parse}:eq(0)`;
       }
     }
@@ -238,7 +238,7 @@ class Jsoup {
     let option: string | undefined;
     if (this.contains(parse, '&&')) {
       const parts: string[] = parse.split('&&');
-      option = parts[parts.length - 1];
+      option = parts.at(-1);
       parse = parts.slice(0, -1).join('&&');
     }
     parse = this.parseHikerToJq(parse, true);

@@ -1,6 +1,5 @@
+import { FILE_MANAGE_API } from '@shared/config/env';
 import { SITE_API_MAP, SITE_TYPE } from '@shared/config/film';
-
-import { fileManageApi } from '@/utils/env';
 
 export const DEBUG_PREFIX = 'debug';
 
@@ -140,7 +139,7 @@ export const SITE_DIFF_DEBUG_MAP = {
   [SITE_TYPE.T3_DRPY]: {
     type: SITE_TYPE.T3_DRPY,
     api: SITE_API_MAP[SITE_TYPE.T3_DRPY],
-    ext: `${fileManageApi}/drpy_dzlive/drpy_js/${DEBUG_PREFIX}.js`,
+    ext: `${FILE_MANAGE_API}/drpy_dzlive/drpy_js/${DEBUG_PREFIX}.js`,
   },
   [SITE_TYPE.T4_CATVOD]: { type: SITE_TYPE.T4_CATVOD, api: '', ext: '' },
   [SITE_TYPE.T3_XBPQ]: { type: SITE_TYPE.T3_XBPQ, api: '', ext: '' },
@@ -148,9 +147,9 @@ export const SITE_DIFF_DEBUG_MAP = {
   [SITE_TYPE.T3_APPYSV2]: { type: SITE_TYPE.T3_APPYSV2, api: '', ext: '' },
   [SITE_TYPE.T3_PY]: {
     type: SITE_TYPE.T3_PY,
-    api: `${fileManageApi}/py/${DEBUG_PREFIX}.py`,
+    api: `${FILE_MANAGE_API}/py/${DEBUG_PREFIX}.py`,
     ext: '',
   },
-  [SITE_TYPE.T3_CATOPEN]: { type: SITE_TYPE.T3_CATOPEN, api: `${fileManageApi}/catopen/${DEBUG_PREFIX}.js`, ext: '' },
+  [SITE_TYPE.T3_CATOPEN]: { type: SITE_TYPE.T3_CATOPEN, api: `${FILE_MANAGE_API}/catopen/${DEBUG_PREFIX}.js`, ext: '' },
   [SITE_TYPE.T3_ALIST]: { type: SITE_TYPE.T3_ALIST, api: '', ext: '' },
 };

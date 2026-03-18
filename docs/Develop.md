@@ -2,9 +2,10 @@
 
 ## IDE Setup
 
-- Editor: [VS Code](https://code.visualstudio.com)
-- Linter: [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- Formatter: [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+### VSCode like
+
+- Editor: [VS Code](https://code.visualstudio.com), etc. Any VS Code compatible editor.
+- Recommended extensions are listed in [`.vscode/extensions.json`](/.vscode/extensions.json).
 
 ## Project Setup
 
@@ -18,13 +19,18 @@ pnpm install
 
 ### Setup Node.js
 
-Download and install [Node.js v22.x.x](https://nodejs.org/en/download)
+The required Node.js version is defined in `.node-version`. Use a version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install it automatically:
+
+```bash
+nvm install
+```
 
 ### Setup pnpm
 
+The pnpm version is locked in the `packageManager` field of `package.json`. Just enable corepack and it will use the correct version automatically:
+
 ```bash
 corepack enable
-corepack prepare pnpm@10.27.0 --activate
 ```
 
 ### Install Dependencies

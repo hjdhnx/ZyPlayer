@@ -26,7 +26,7 @@
             <pane>
               <div class="action-pane">
                 <t-tabs v-model="active.action" theme="card" lazy class="pane-right">
-                  <t-tab-panel :label="$t('pages.lab.edit.debug.dom')" value="data">
+                  <t-tab-panel :label="$t('pages.lab.edit.debug.data')" value="data">
                     <div class="action-pane-data">
                       <div class="action-item req-item">
                         <input-req
@@ -323,9 +323,12 @@ const actionGenerateCategory = async () => {
     siftFormData.value.class_url = resp.uuid;
     categoryResult.value = resp.raw;
 
+    logger('testResult', `${toHMS()} [Category]`, 'verbose', resp.raw);
+
     MessagePlugin.success(t('common.success'));
   } catch (error) {
     console.error(`Fail to generate category`, error);
+    logger('testResult', `${toHMS()} [Category]`, 'error', error);
     MessagePlugin.error(`${t('common.error')}:${(error as Error).message}`);
   } finally {
     loading.value.category = false;
@@ -399,11 +402,12 @@ const actionGenerateCurrentSift = async () => {
       excludeKeys: exclude_keys,
     });
 
-    logger('testResult', `<Data>CurrentSift: ${toHMS()} > `, 'verbose', resp);
+    logger('testResult', `${toHMS()} [CurrentSift]`, 'verbose', resp);
 
     MessagePlugin.success(t('common.success'));
   } catch (error) {
-    logger('testResult', `<Data>CurrentSift: ${toHMS()} > `, 'error', error);
+    console.error(`Fail to generate current sift`, error);
+    logger('testResult', `${toHMS()} [CurrentSift]`, 'error', error);
     MessagePlugin.error(`${t('common.error')}:${(error as Error).message}`);
   } finally {
     loading.value.sift = false;
@@ -449,11 +453,12 @@ const actionGenerateAllSift = async () => {
     const filterRes = filterResp.reduce((a, { id, filters }) => (filters ? ((a[id] = filters), a) : a), {});
 
     siftResult.value = filterRes;
-    logger('testResult', `<Data>FinalSift: ${toHMS()} > `, 'verbose', filterRes);
+    logger('testResult', `${toHMS()} [FinalSift]`, 'verbose', filterRes);
 
     MessagePlugin.success(t('common.success'));
   } catch (error) {
-    logger('testResult', `<Data>FinalSift: ${toHMS()} > `, 'error', error);
+    console.error(`Fail to generate final sift`, error);
+    logger('testResult', `${toHMS()} [FinalSift]`, 'error', error);
     MessagePlugin.error(`${t('common.error')}:${(error as Error).message}`);
   } finally {
     loading.value.allSift = false;

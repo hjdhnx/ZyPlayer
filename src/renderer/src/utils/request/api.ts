@@ -1,4 +1,5 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
+import { ORIGIN, PREFIX } from '@shared/config/env';
 import { VAxios } from '@shared/modules/request';
 import type { AxiosTransform, CreateAxiosOptions } from '@shared/modules/request/axios/AxiosTransform';
 import { ContentTypeEnum } from '@shared/modules/request/constants';
@@ -7,7 +8,6 @@ import { isHttp, isString } from '@shared/modules/validate';
 import type { AxiosInstance } from 'axios';
 import { merge } from 'es-toolkit';
 
-import { host, prefix } from '@/utils/env';
 import { getTimeout } from '@/utils/tool';
 
 // 数据处理，方便区分多种处理方式
@@ -158,12 +158,12 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
         // 配置项，下面的选项都可以在独立的接口请求中覆盖
         requestOptions: {
           // 接口地址
-          apiUrl: host,
+          apiUrl: ORIGIN,
           // 是否自动添加接口前缀
           isJoinPrefix: true,
           // 接口前缀
           // 例如: https://www.baidu.com/api
-          urlPrefix: prefix,
+          urlPrefix: PREFIX,
           // 是否返回原生响应头 比如：需要获取响应头时使用该属性
           isReturnNativeResponse: false,
           // 需要对返回数据进行处理

@@ -9,18 +9,8 @@
         <t-divider dashed class="divider" />
       </div>
       <div class="share-container-main-right">
-        <div class="qrcode-container">
-          <t-qrcode
-            v-if="formIDataProps.url"
-            :value="formIDataProps.url"
-            borderless
-            level="L"
-            :size="66"
-            type="svg"
-            class="qrcode"
-          />
-          <t-qrcode v-else value="zyfun" borderless level="L" :size="66" type="svg" class="qrcode" status="loading" />
-        </div>
+        <t-qrcode v-if="formIDataProps.url" :value="formIDataProps.url" level="L" :size="66" class="qrcode" />
+        <t-qrcode v-else value="zyfun" borderless level="L" :size="66" type="svg" class="qrcode" status="loading" />
       </div>
     </div>
     <div class="bottom-copy">
@@ -166,30 +156,8 @@ const handleCopy = async () => {
       flex-grow: 0;
       flex-shrink: 0;
 
-      .qrcode-container {
-        width: calc(var(--td-comp-size-xxxxxl) + var(--td-size-1));
-        height: calc(var(--td-comp-size-xxxxxl) + var(--td-size-1));
-        border-radius: var(--td-radius-medium);
-        background-color: var(--td-bg-color-component);
+      .qrcode {
         padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-xs);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .qrcode {
-          border-radius: var(--td-radius-default);
-          padding: 0;
-          border: 0;
-          overflow: hidden;
-
-          :deep(.t-mask) {
-            border-radius: 0;
-          }
-
-          :deep(svg) {
-            border-radius: var(--td-radius-xs);
-          }
-        }
       }
     }
   }
@@ -201,11 +169,7 @@ const handleCopy = async () => {
   .bottom-copy {
     :deep(.input-only) {
       .t-input {
-        border-width: 0;
-      }
-
-      .t-input--focused {
-        box-shadow: none;
+        border: none;
       }
     }
 

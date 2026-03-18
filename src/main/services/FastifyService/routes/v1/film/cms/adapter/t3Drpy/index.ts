@@ -3,106 +3,49 @@ import { join } from 'node:path';
 
 import { loggerService } from '@logger';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
-import LruCache from '@shared/modules/lrucache';
 import { isJson } from '@shared/modules/validate';
-import type {
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsMethodName, ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import type { Pool } from 'workerpool';
 import workerpool from 'workerpool';
 
-interface IWorkerOptionsMap {
-  init: any;
-  home: undefined;
-  homeVod: undefined;
-  category: ICmsCategoryOptions;
-  detail: ICmsDetailOptions;
-  play: ICmsPlayOptions;
-  search: ICmsSearchOptions;
-  proxy: ICmsProxyOptions;
-  runMain: ICmsRunMianOptions;
-}
-
-interface IWorkerResultMap {
-  init: ICmsInit;
-  home: ICmsHome;
-  homeVod: ICmsHomeVod;
-  category: ICmsCategory;
-  detail: ICmsDetail;
-  play: ICmsPlay & { parse_extra?: string; js?: string; header?: Record<string, any> };
-  search: ICmsSearch;
-  proxy: ICmsProxy;
-  runMain: ICmsRunMian;
-}
-
-type IWorkerType = keyof IWorkerOptionsMap;
-
-class WorkerLruCache<K = string, V = Pool> extends LruCache<K, V> {
-  put(key: K, value: V): V {
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    } else if (this.cache.size >= this.capacity) {
-      const firstKey = this.cache.keys().next().value;
-      const pool = this.cache.get(firstKey!);
-      (pool as any).terminate(true);
-      this.cache.delete(this.cache.keys().next().value!);
-    }
-    this.cache.set(key, value);
-    return value;
-  }
-
-  delete(key: K): boolean {
-    if (!this.cache.has(key)) return false;
-
-    (this.cache.get(key) as any).terminate(true);
-
-    super.delete(key);
-    return true;
-  }
-}
-const cacheQueueSize: number = 6;
-const lruCache = new WorkerLruCache(cacheQueueSize);
+type ICmsResultCustom = Omit<Awaited<ICmsResultPromise>, 'play'> & {
+  play: Awaited<ICmsResultPromise['play']> & {
+    parse_extra?: string;
+    js?: string;
+    header?: Record<string, any>;
+  };
+};
 
 const logger = loggerService.withContext(SITE_LOGGER_MAP[SITE_TYPE.T3_DRPY]);
 
 class T3DrpyAdapter {
-  private id: string = '';
   private ext: string = '';
   private categories: string[] = [];
 
+  private pool: Pool | null = null;
+
   constructor(source: IConstructorOptions) {
-    this.id = source.id;
     this.ext = source.ext!;
     this.categories = source.categories;
   }
 
-  private async execCtx<T extends IWorkerType>(type: T, options?: IWorkerOptionsMap[T]): Promise<IWorkerResultMap[T]> {
-    let pool = lruCache.get(this.id);
-    if (!pool) {
-      pool = workerpool.pool(join(import.meta.dirname, 'film_cms_adapter_t3_drpy_worker.js'), {
+  public async destroy(): Promise<void> {
+    if (this.pool) {
+      await this.pool.terminate();
+      this.pool = null;
+    }
+  }
+
+  private async execCtx<T extends ICmsMethodName>(type: T, options?: ICmsParams[T]): Promise<ICmsResultCustom[T]> {
+    if (!this.pool) {
+      this.pool = workerpool.pool(join(import.meta.dirname, 'film_cms_adapter_t3_drpy_worker.js'), {
         workerType: 'process',
-        maxWorkers: cacheQueueSize,
+        maxWorkers: 1,
         forkOpts: { silent: true },
       });
-      lruCache.put(this.id, pool);
     }
 
-    const resp = await pool.exec('main', [type, options], {
+    const resp = await this.pool.exec('main', [type, options], {
       on(payload) {
         const { type, level, msg } = payload;
 
@@ -121,11 +64,11 @@ class T3DrpyAdapter {
     return resp;
   }
 
-  public async init(): Promise<ICmsInit> {
+  public async init(): ICmsResultPromise['init'] {
     await this.execCtx('init', this.ext);
   }
 
-  public async home(): Promise<ICmsHome> {
+  public async home(): ICmsResultPromise['home'] {
     const resp = await this.execCtx('home');
 
     const rawClassList = Array.isArray(resp?.class) ? resp?.class : [];
@@ -154,7 +97,7 @@ class T3DrpyAdapter {
     return { class: classes, filters };
   }
 
-  public async homeVod(): Promise<ICmsHomeVod> {
+  public async homeVod(): ICmsResultPromise['homeVod'] {
     const resp = await this.execCtx('homeVod');
 
     const rawList = Array.isArray(resp?.list) ? resp.list : [];
@@ -176,7 +119,7 @@ class T3DrpyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  public async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page = 1, extend = {} } = doc || {};
     const resp = await this.execCtx('category', { tid, page, extend });
 
@@ -199,7 +142,7 @@ class T3DrpyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  public async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const resp = await this.execCtx('detail', { ids });
 
@@ -234,7 +177,7 @@ class T3DrpyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  public async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
     const resp = await this.execCtx('search', { wd, page });
 
@@ -257,7 +200,7 @@ class T3DrpyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  public async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc || {};
     const resp = await this.execCtx('play', { flag, play });
 
@@ -283,12 +226,18 @@ class T3DrpyAdapter {
     return res;
   }
 
-  async proxy(doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async action(doc: ICmsParams['action']): ICmsResultPromise['action'] {
+    const { action, value, timeout } = doc || {};
+    const resp = await this.execCtx('action', { action, value, timeout });
+    return resp;
+  }
+
+  async proxy(doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     const resp = await this.execCtx('proxy', doc);
     return resp;
   }
 
-  public async runMain(doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  public async runMain(doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     const resp = await this.execCtx('runMain', doc);
     return resp;
   }

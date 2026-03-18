@@ -200,7 +200,7 @@ class OPlayerAdapter {
             'zh-TW': ZH_TW,
           } as any);
           player.on(['next'], () => {
-            emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT);
+            emitter.emit(emitterChannel.COMP_MULTI_PLAYER_PLAYNEXT, {});
           });
           return player;
         },
@@ -216,11 +216,11 @@ class OPlayerAdapter {
         heatmap: false,
         source: [],
       }),
-      OHls({ config: Object.assign({}, streamConfig.hls(rawOptions.headers)) }),
-      ODash({ config: { streaming: Object.assign({}, streamConfig.dash.stream(rawOptions.headers)) } }),
-      OMpegts({ config: Object.assign({}, streamConfig.mpegts.optional(rawOptions.headers)) }),
-      // OShaka({ config: Object.assign({}, streamConfig.shaka(rawOptions.headers)) }),
-      OTorrent({ library: WebTorrentjs, config: Object.assign({}, streamConfig.torrent(rawOptions.headers)) }),
+      OHls({ config: { ...streamConfig.hls(rawOptions.headers) } }),
+      ODash({ config: { streaming: { ...streamConfig.dash.stream(rawOptions.headers) } } }),
+      OMpegts({ config: { ...streamConfig.mpegts.optional(rawOptions.headers) } }),
+      // OShaka({ config: { ...streamConfig.shaka(rawOptions.headers) } }),
+      OTorrent({ library: WebTorrentjs, config: { ...streamConfig.torrent(rawOptions.headers) } }),
     ];
 
     // 初始化

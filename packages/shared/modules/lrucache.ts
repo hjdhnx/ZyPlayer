@@ -112,7 +112,7 @@ export class LruCache<K = string, V = any> {
    * @returns Array of keys
    */
   keys(): K[] {
-    return Array.from(this.cache.keys());
+    return [...this.cache.keys()];
   }
 
   /**
@@ -121,7 +121,7 @@ export class LruCache<K = string, V = any> {
    * @returns Array of values
    */
   values(): V[] {
-    return Array.from(this.cache.values());
+    return [...this.cache.values()];
   }
 
   /**
@@ -130,7 +130,7 @@ export class LruCache<K = string, V = any> {
    * @returns Array of key-value pairs
    */
   entries(): [K, V][] {
-    return Array.from(this.cache.entries());
+    return [...this.cache.entries()];
   }
 
   /**

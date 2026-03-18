@@ -10,6 +10,14 @@ export default {
   base: {
     bossKey: '老板鍵',
     timeout: '超時',
+    zoom: {
+      title: '縮放',
+      levelMap: {
+        small: '小',
+        standard: '標準',
+        large: '大',
+      },
+    },
     hot: '熱榜',
     site: {
       title: '站點',

@@ -27,10 +27,15 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     return { code: 0, msg: 'ok', data: { timestamp: toUnix(), version: APP_VERSION } };
   });
 
-  fastify.get(`/${API_PREFIX}/ip`, { schema: ipSchema }, async () => {
-    const resp = await getNetwork();
-    return { code: 0, msg: 'ok', data: resp };
-  });
+  fastify.get(
+    `/${API_PREFIX}/ip`,
+    { schema: ipSchema },
+    async (req: FastifyRequest<{ Querystring: { preferIPv6?: boolean } }>) => {
+      const { preferIPv6 = true } = req.query;
+      const resp = await getNetwork(preferIPv6);
+      return { code: 0, msg: 'ok', data: resp };
+    },
+  );
 
   fastify.post(
     `/${API_PREFIX}/req`,

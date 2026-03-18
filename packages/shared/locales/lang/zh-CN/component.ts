@@ -1,4 +1,7 @@
 export default {
+  action: {
+    countdown: '{0}秒后关闭',
+  },
   hot: {
     title: '热门搜索',
     category: {

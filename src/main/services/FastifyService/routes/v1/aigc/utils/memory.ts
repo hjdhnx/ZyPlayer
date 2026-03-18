@@ -54,7 +54,7 @@ class MemoryManager {
    */
   addMessage(sessionId: string, messages: ChatMessage | ChatMessage[]): ChatSession {
     const history = this.messages.get(sessionId) || [];
-    const newHistory = history.concat(isArray(messages) ? messages : [messages]);
+    const newHistory = [...history, ...(isArray(messages) ? messages : [messages])];
     this.messages.set(sessionId, newHistory);
     return { id: sessionId, messages: newHistory };
   }
@@ -111,7 +111,7 @@ class MemoryManager {
    * @returns All session IDs
    */
   getSessionIds(): string[] {
-    return Array.from(this.messages.keys());
+    return [...this.messages.keys()];
   }
 
   /**

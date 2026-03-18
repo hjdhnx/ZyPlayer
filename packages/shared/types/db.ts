@@ -1,7 +1,8 @@
 import type { Client, Config } from '@libsql/client';
 import type { Models, Schemas, TableName } from '@main/services/DbService/schemas';
-import type { ISetting } from '@shared/config/tblSetting';
 import type { drizzle } from 'drizzle-orm/libsql';
+
+import type { ISetting } from '../config/tblSetting';
 
 export type IClient = Client;
 

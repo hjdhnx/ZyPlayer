@@ -1,8 +1,9 @@
-import { isJson, isJsonStr, isStrEmpty, isString } from '@shared/modules/validate';
 import JSON5 from 'json5';
 
+import { isJson, isJsonStr, isStrEmpty, isString } from './validate';
+
 /**
- * Convert a JSON string to an object.
+ * Convert a JSON string to an object
  *
  * @param val - The JSON string to convert
  * @returns The converted object
@@ -17,7 +18,7 @@ export const jsonStrToObj = (val: string): Record<string, any> => {
 };
 
 /**
- * Convert a JSON5 object to a JSON object.
+ * Convert a JSON5 object to a JSON object
  *
  * @param val - The JSON5 object to convert
  * @returns The converted JSON object
@@ -32,7 +33,23 @@ export const json5Tojson = (val: Record<string, any>): Record<string, any> => {
 };
 
 /**
- * Create an object from an iterable of key/value pairs.
+ * Convert a JSON string to an object by eval
+ *
+ * @param val - The JSON string to convert
+ * @returns The converted object
+ */
+export const jsonStrToObjByEval = (val: string): Record<string, any> => {
+  try {
+    const raw = String.raw`${val}`;
+    // eslint-disable-next-line no-new-func
+    return new Function(`return (${raw});`)();
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * Create an object from an iterable of key/value pairs
  *
  * @param entries - The key value pairs (ex. [['a', 1], ['b', 2]])
  * @return The created object
@@ -54,7 +71,7 @@ export function entriesToObj<V>(entries: Iterable<readonly [PropertyKey, V]>): {
 }
 
 /**
- * Get value by path from object.
+ * Get value by path from object
  * @param obj - The object to get value from
  * @param path - The path string (ex. 'a.b.c')
  * @returns The value at the specified path

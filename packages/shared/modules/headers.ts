@@ -1,8 +1,9 @@
-import { pascalCase } from '@shared/modules/camelcase';
-import { isArray, isNil, isObject, isObjectEmpty, isStrEmpty, isString, isUndefined } from '@shared/modules/validate';
 import JSON5 from 'json5';
 import type { ParsedQs } from 'qs';
 import qs from 'qs';
+
+import { pascalCase } from './camelcase';
+import { isArray, isNil, isObject, isObjectEmpty, isStrEmpty, isString, isUndefined } from './validate';
 
 type IHeaders = Record<string, any>;
 

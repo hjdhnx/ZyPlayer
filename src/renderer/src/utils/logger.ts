@@ -160,7 +160,7 @@ class LoggerService {
     }
 
     // if the last data is an object with logToMain: true, force log to main
-    const forceLogToMain = data.length > 0 && data[data.length - 1]?.logToMain === true;
+    const forceLogToMain = data.length > 0 && data.at(-1)?.logToMain === true;
 
     if (currentLevel >= LEVEL_MAP[this.logToMainLevel] || forceLogToMain) {
       const source: LogSourceWithContext = {

@@ -19,7 +19,7 @@ defineOptions({
 });
 
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
-import { WINDOW_NAME } from '@shared/config/windowName';
+import { WINDOW_NAME } from '@shared/config/window';
 import { CloseIcon, VideoLibraryIcon } from 'tdesign-icons-vue-next';
 import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue';
 

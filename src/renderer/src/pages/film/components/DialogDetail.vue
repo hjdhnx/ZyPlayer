@@ -113,6 +113,7 @@
   </t-dialog>
 </template>
 <script setup lang="tsx">
+import { PROXY_API } from '@shared/config/env';
 import { IPC_CHANNEL } from '@shared/config/ipcChannel';
 import {
   isArray,
@@ -147,7 +148,6 @@ import TitleMenu from '@/components/title-menu/index.vue';
 import { attachContent } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayerStore } from '@/store';
-import { proxyApi } from '@/utils/env';
 
 const props = defineProps({
   visible: {
@@ -442,7 +442,7 @@ const getDirectPlayUrl = async (
 
   // Direct play
   if (playRes.parse === 0 && playRes.jx !== 1) {
-    if (playRes.url.startsWith(proxyApi)) {
+    if (playRes.url.startsWith(PROXY_API)) {
       const { searchParams } = new URL(playRes.url);
       const proxyParams = Object.fromEntries(searchParams.entries());
       const proxyData = await fetchCmsProxy({ uuid: extraConf.value.active.id, ...proxyParams });
